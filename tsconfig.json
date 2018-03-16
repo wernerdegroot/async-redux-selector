@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "removeComments": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "lib": ["es2015"],
+    "declaration": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
