@@ -6,11 +6,11 @@ export class AwaitingFirstResult<R> {
 
   public readonly type = AWAITING_FIRST_RESULT
 
-  constructor(public readonly id: string) { }
+  constructor(public readonly requestId: string) { }
 
   public resultArrived(id: string, r: R, now: Date): AsyncResult<R> {
-    if (this.id === id) {
-      return new ResultArrived(id, r, now)
+    if (this.requestId === id) {
+      return new ResultArrived(r, now)
     } else {
       return this
     }
@@ -21,11 +21,11 @@ export class AwaitingNextResult<R> {
 
   public readonly type = AWAITING_NEXT_RESULT
 
-  constructor(public readonly id: string, public readonly previousResult: R) { }
+  constructor(public readonly requestId: string, public readonly previousResult: R) { }
 
   public resultArrived(id: string, r: R, now: Date): AsyncResult<R> {
-    if (this.id === id) {
-      return new ResultArrived(id, r, now)
+    if (this.requestId === id) {
+      return new ResultArrived(r, now)
     } else {
       return this
     }
@@ -36,7 +36,7 @@ export class ResultArrived<R> {
 
   public readonly type = RESULT_ARRIVED
 
-  constructor(public readonly id: string, public readonly result: R, public readonly when: Date) { }
+  constructor(public readonly result: R, public readonly when: Date) { }
 
   public resultArrived(id: string, r: R, now: Date): AsyncResult<R> {
     throw new Error('Result has already arrived!')

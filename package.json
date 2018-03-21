@@ -29,7 +29,8 @@
     "@types/jest": "^22.1.2",
     "jest": "^22.3.0",
     "ts-jest": "^22.0.4",
-    "typescript": "^2.7.1"
+    "typescript": "^2.7.1",
+    "@types/uuid": "^3.4.3"
   },
   "jest": {
     "transform": {
@@ -46,6 +47,7 @@
     ]
   },
   "dependencies": {
-    "date-fns": "^1.29.0"
+    "date-fns": "^1.29.0",
+    "node-uuid": "^1.4.8"
   }
 }
