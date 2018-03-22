@@ -46,4 +46,8 @@ export function resultArrivedAction<I, R>(resourceId: string, requestId: string,
   }
 }
 
+export function isResultArrivedAction<I, R>(action: GenericAction): action is IResultArrivedAction<I, R> {
+  return action.type === RESULT_ARRIVED
+}
+
 export type ResourceAction<I, R> = IAwaitingResultAction<I> | IResultArrivedAction<I, R>

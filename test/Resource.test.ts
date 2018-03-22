@@ -1,43 +1,9 @@
-import { addMilliseconds } from 'date-fns'
 import { Resource } from '../Resource'
-import { isAwaitingResultAction, ResourceAction } from '../Action'
+import { GenericAction } from '../Action'
 import { ADVICE } from '../AsyncResultOrAdvice'
-import { assert, isAwaitingResult, matchesAll } from './matchers'
-import { inputEq } from './data'
+import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
+import { bigLifetime, Input, inputEq, Result, someInput, someResourceId, someResult } from './data'
 import { defer } from './IDeferred'
-// import { isAwaitingResultAction } from './matchers'
-
-type Input = {
-  inputValue: string
-}
-
-const someInput: Input = {
-  inputValue: 'some-input'
-}
-
-const someOtherInput: Input = {
-  inputValue: 'some-other-input'
-}
-
-type Result = {
-  resultValue: number
-}
-
-const someResult: Result = {
-  resultValue: 4
-}
-
-const someId = 'some-requestId'
-const someOtherId = 'some-other-requestId'
-
-const someResourceId = 'some-resource-id'
-
-const now = new Date(2018, 3, 8, 2, 4, 1)
-const smallLifetime = 2 * 60 * 1000
-const bigLifetime = 6 * 60 * 1000
-const later = addMilliseconds(now, (smallLifetime + bigLifetime) / 2)
-
-type Action = ResourceAction<any, any> | { type: 'MY_ACTION' }
 
 describe('Resource', () => {
 
@@ -46,33 +12,38 @@ describe('Resource', () => {
     const deferred = defer<Result>()
 
     function runner(input: Input): Promise<Result> {
-      if (input === someInput) {
+      if (inputEq(input, someInput)) {
         return deferred.promise
       } else {
         throw new Error('Should not happen!')
       }
     }
 
-    const resource = new Resource<Input, Result, Action>(someResourceId, runner, inputEq, bigLifetime)
+    const resource = new Resource<Input, Result, GenericAction>(someResourceId, runner, inputEq, bigLifetime)
 
     const asyncResultOrAdvice = resource.selector([], someInput)
 
-    const actions: Action[] = []
-    function dispatch(action: Action): void {
+    const actions: GenericAction[] = []
+    function dispatch(action: GenericAction): void {
       actions.push(action)
     }
 
     if (asyncResultOrAdvice.type === ADVICE) {
+
+      // Initally empty:
       assert(actions).toMatch(matchesAll([]))
+
+      // Start the request:
       asyncResultOrAdvice.advice.followAdvice(dispatch)
       assert(actions).toMatch(matchesAll([
-        isAwaitingResult(someInput)
+        matchAwaitingResult(someInput)
       ]))
 
+      // Response received:
       await deferred.resolve(someResult)
-
       assert(actions).toMatch(matchesAll([
-        isAwaitingResult(someInput)
+        matchAwaitingResult(someInput),
+        matchResultArrived(someInput, someResult)
       ]))
     } else {
       fail('Expected an advice')
