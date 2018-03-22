@@ -32,7 +32,7 @@
     "@types/uuid": "^3.4.3"
   },
   "jest": {
-    "testRegex": "/test/.*\\.js$"
+    "testRegex": "/test/.*\\.test\\.js$"
   },
   "dependencies": {
     "date-fns": "^1.29.0",

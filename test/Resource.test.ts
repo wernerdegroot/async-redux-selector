@@ -1,15 +1,14 @@
 import { addMilliseconds } from 'date-fns'
 import { Resource } from '../Resource'
-import { ResourceAction } from '../Action'
+import { isAwaitingResultAction, ResourceAction } from '../Action'
 import { ADVICE } from '../AsyncResultOrAdvice'
+import { assert, isAwaitingResult, matchesAll } from './matchers'
+import { inputEq } from './data'
+import { defer } from './IDeferred'
 // import { isAwaitingResultAction } from './matchers'
 
 type Input = {
   inputValue: string
-}
-
-function inputEq(left: Input, right: Input): boolean {
-  return left.inputValue === right.inputValue
 }
 
 const someInput: Input = {
@@ -42,18 +41,13 @@ type Action = ResourceAction<any, any> | { type: 'MY_ACTION' }
 
 describe('Resource', () => {
 
-  it('should produce an advice for requests that weren\'t made before', () => {
+  it('should produce an advice for requests that weren\'t made before', async () => {
 
-    let deferred: (result: Result) => void
-    const promise = new Promise<Result>(resolve => {
-      deferred = (result: Result) => {
-        resolve(result)
-      }
-    })
+    const deferred = defer<Result>()
 
     function runner(input: Input): Promise<Result> {
       if (input === someInput) {
-        return promise
+        return deferred.promise
       } else {
         throw new Error('Should not happen!')
       }
@@ -69,11 +63,19 @@ describe('Resource', () => {
     }
 
     if (asyncResultOrAdvice.type === ADVICE) {
+      assert(actions).toMatch(matchesAll([]))
       asyncResultOrAdvice.advice.followAdvice(dispatch)
-      expect(actions.length).toBe(1)
-      // isAwaitingResultAction<Action, Input, Result>(actions[0], someInput, someResourceId)
+      assert(actions).toMatch(matchesAll([
+        isAwaitingResult(someInput)
+      ]))
+
+      await deferred.resolve(someResult)
+
+      assert(actions).toMatch(matchesAll([
+        isAwaitingResult(someInput)
+      ]))
     } else {
-      fail()
+      fail('Expected an advice')
     }
   })
 })

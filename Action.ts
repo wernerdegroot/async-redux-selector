@@ -1,3 +1,7 @@
+export interface GenericAction {
+  type: string
+}
+
 export const AWAITING_RESULT = 'AWAITING_RESULT'
 
 export interface IAwaitingResultAction<I> {
@@ -16,6 +20,10 @@ export function awaitingResultAction<I>(resourceId: string, requestId: string, i
     input,
     currentTime
   }
+}
+
+export function isAwaitingResultAction<I>(action: GenericAction): action is IAwaitingResultAction<I> {
+  return action.type === AWAITING_RESULT
 }
 
 export const RESULT_ARRIVED = 'RESULT_ARRIVED'
