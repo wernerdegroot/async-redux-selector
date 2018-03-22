@@ -4,8 +4,8 @@
   "description": "Asynchronous Redux selectors",
   "main": "index.js",
   "scripts": {
-    "test": "jest --no-cache",
-    "clean": "rm -rf {*.js,*.d.ts}",
+    "test": "tsc -p . --p tsconfig.test.json && jest --no-cache && npm run clean",
+    "clean": "rm -rf {*.js,*.d.ts,test/*.js,test/*.d.ts}",
     "compile": "npm run clean && tsc -p .",
     "prepublishOnly": "npm run test && npm run compile"
   },
@@ -28,23 +28,11 @@
   "devDependencies": {
     "@types/jest": "^22.1.2",
     "jest": "^22.3.0",
-    "ts-jest": "^22.0.4",
     "typescript": "^2.7.1",
     "@types/uuid": "^3.4.3"
   },
   "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
+    "testRegex": "/test/.*\\.js$"
   },
   "dependencies": {
     "date-fns": "^1.29.0",

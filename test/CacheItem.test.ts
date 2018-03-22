@@ -1,6 +1,6 @@
 import { addMilliseconds } from 'date-fns'
-import { CacheItem } from './CacheItem'
-import { AwaitingFirstResult, ResultArrived } from './AsyncResult'
+import { CacheItem } from '../CacheItem'
+import { AwaitingFirstResult, ResultArrived } from '../AsyncResult'
 
 type Input = {
   inputValue: string

@@ -1,4 +1,4 @@
-import { AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from './AsyncResult'
+import { AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from '../AsyncResult'
 
 type Result = {
   value: string

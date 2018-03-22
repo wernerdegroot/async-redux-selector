@@ -2,10 +2,11 @@ import { awaitingResult, Cache, getAsyncResultIfValid } from './Cache'
 import { v4 as uuid } from 'uuid'
 import { AsyncResultOrAdvice, HasAdvice } from './AsyncResultOrAdvice'
 import { CacheItem } from './CacheItem'
+import { IAwaitingResultAction, IResultArrivedAction } from './Action'
 import { IAdvice } from './IAdvice'
 import { AWAITING_RESULT, awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
 
-export class Resource<I, R, Action extends ResourceAction<I, R>> {
+export class Resource<I, R, Action extends { type: string }> {
 
   constructor(private readonly resourceId: string,
               private readonly runner: (input: I) => Promise<R>,
@@ -24,16 +25,14 @@ export class Resource<I, R, Action extends ResourceAction<I, R>> {
     }
   }
 
-  public reducer = (cache: Cache<I, R>, action: Action): Cache<I, R> => {
-    if (action.resourceId === this.resourceId) {
-      switch (action.type) {
-        case AWAITING_RESULT:
-          return awaitingResult(cache, this.inputEq, this.validityInMiliseconds, action.resourceId, action.input)
-        default:
-          return cache
-      }
-    } else {
-      return cache
+  public reducer = (cache: Cache<I, R>, action: Action & ResourceAction<I, R>): Cache<I, R> => {
+    switch (action.type) {
+      case AWAITING_RESULT:
+        return action.resourceId === this.resourceId
+          ? awaitingResult(cache, this.inputEq, this.validityInMiliseconds, action.resourceId, action.input)
+          : cache
+      default:
+        return cache
     }
   }
 
