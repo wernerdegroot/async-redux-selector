@@ -8,7 +8,7 @@ import {
   now,
   Result,
   smallLifetime,
-  someInput, someOtherInput,
+  someInput,
   someOtherRequestId, someOtherResult,
   someRequestId,
   someResult
