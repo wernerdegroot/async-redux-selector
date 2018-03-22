@@ -9,7 +9,9 @@ import {
   Result,
   smallLifetime,
   someInput,
-  someOtherRequestId, someOtherResult,
+  someOtherInput,
+  someOtherRequestId,
+  someOtherResult,
   someRequestId,
   someResult
 } from './data'
@@ -81,5 +83,21 @@ describe('Cache', () => {
     expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
     cache = resultArrived(cache, inputEq, someOtherRequestId, someInput, someOtherResult, later)
     expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someOtherResult, later))
+  })
+
+  it('should be able to handle multiple requests', () => {
+    let cache: Cache<Input, Result> = []
+    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
+    cache = awaitingResult(cache, inputEq, bigLifetime, someOtherRequestId, someOtherInput)
+    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingFirstResult(someRequestId))
+    expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+
+    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, later)
+    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, later))
+    expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+
+    cache = resultArrived(cache, inputEq, someOtherRequestId, someOtherInput, someOtherResult, later)
+    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, later))
+    expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new ResultArrived(someOtherResult, later))
   })
 })
