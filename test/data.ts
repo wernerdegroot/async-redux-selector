@@ -28,6 +28,10 @@ export const someResult: Result = {
   resultValue: 4
 }
 
+export const someOtherResult: Result = {
+  resultValue: 5
+}
+
 export const someRequestId = 'some-request-id'
 export const someOtherRequestId = 'some-other-request-id'
 
