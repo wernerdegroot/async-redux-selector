@@ -1,14 +1,10 @@
-import { IAdvice } from './IAdvice'
 import { AsyncResult } from './AsyncResult'
 
 export const ADVICE = 'ADVICE'
 
-export class HasAdvice<Action> {
-  public readonly type = ADVICE
-
-  constructor(public readonly advice: IAdvice<Action>) {
-
-  }
+export interface IHasAdvice<Action> {
+  type: typeof ADVICE
+  followAdvice(dispatch: (action: Action) => void): void
 }
 
-export type AsyncResultOrAdvice<R, Action> = AsyncResult<R> | HasAdvice<Action>
+export type AsyncResultOrAdvice<R, Action> = AsyncResult<R> | IHasAdvice<Action>

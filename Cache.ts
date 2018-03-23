@@ -39,10 +39,10 @@ export function awaitingResult<I, R>(cache: Cache<I, R>, eq: (left: I, right: I)
   return items
 }
 
-export function resultArrived<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) => boolean, id: string, input: I, result: R, now: Date): Cache<I, R> {
+export function resultArrived<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) => boolean, requestId: string, input: I, result: R, now: Date): Cache<I, R> {
   const items = cache.map(item => {
     if (eq(item.input, input)) {
-      return item.resultArrived(id, result, now)
+      return item.resultArrived(requestId, result, now)
     } else {
       return item
     }

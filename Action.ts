@@ -34,15 +34,17 @@ export interface IResultArrivedAction<I, R> {
   requestId: string
   input: I
   result: R
+  currentTime: Date
 }
 
-export function resultArrivedAction<I, R>(resourceId: string, requestId: string, input: I, result: R): IResultArrivedAction<I, R> {
+export function resultArrivedAction<I, R>(resourceId: string, requestId: string, input: I, result: R, currentTime: Date): IResultArrivedAction<I, R> {
   return {
     type: RESULT_ARRIVED,
     resourceId,
     requestId,
     input,
-    result
+    result,
+    currentTime
   }
 }
 

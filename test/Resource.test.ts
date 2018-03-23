@@ -34,7 +34,7 @@ describe('Resource', () => {
       assert(actions).toMatch(matchesAll([]))
 
       // Start the request:
-      asyncResultOrAdvice.advice.followAdvice(dispatch)
+      asyncResultOrAdvice.followAdvice(dispatch)
       assert(actions).toMatch(matchesAll([
         matchAwaitingResult(someInput)
       ]))
