@@ -14,7 +14,7 @@ export class CacheItem<I, R> {
   }
 
   public resultArrived(id: string, result: R, now: Date): CacheItem<I, R> {
-    const asyncResult = this.asyncResult.resultArrived(id, result, now)
+    const asyncResult = AsyncResult.resultArrived(this.asyncResult, id, result, now)
     return new CacheItem<I, R>(this.input, asyncResult, this.lifeTimeInMiliseconds, false)
   }
 

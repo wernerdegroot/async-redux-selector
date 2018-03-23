@@ -1,4 +1,4 @@
-import { AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from '../AsyncResult'
+import { AsyncResult, AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from '../AsyncResult'
 
 type Result = {
   value: string
@@ -19,9 +19,9 @@ const now = new Date(2018, 3, 8, 2, 4, 1)
 
 describe('AsyncResult', () => {
   it('should only transition from AWAITING_FIRST_RESULT to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
-    const awaitingFirstResult = new AwaitingFirstResult<Result>(someId)
-    const transitionForSameId = awaitingFirstResult.resultArrived(someId, someResult, now)
-    const transitionForOtherId = awaitingFirstResult.resultArrived(someOtherId, someResult, now)
+    const awaitingFirstResult = new AwaitingFirstResult(someId)
+    const transitionForSameId = AsyncResult.resultArrived(awaitingFirstResult, someId, someResult, now)
+    const transitionForOtherId = AsyncResult.resultArrived(awaitingFirstResult, someOtherId, someResult, now)
 
     expect(transitionForSameId).toEqual(new ResultArrived(someResult, now))
     expect(transitionForOtherId).toEqual(awaitingFirstResult)
@@ -29,8 +29,8 @@ describe('AsyncResult', () => {
 
   it('should only transition from AWAITING_NEXT_RESULT to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
     const awaitingNextResult = new AwaitingNextResult<Result>(someId, someResult)
-    const transitionForSameId = awaitingNextResult.resultArrived(someId, someOtherResult, now)
-    const transitionForOtherId = awaitingNextResult.resultArrived(someOtherId, someOtherResult, now)
+    const transitionForSameId = AsyncResult.resultArrived(awaitingNextResult, someId, someOtherResult, now)
+    const transitionForOtherId = AsyncResult.resultArrived(awaitingNextResult, someOtherId, someOtherResult, now)
 
     expect(transitionForSameId).toEqual(new ResultArrived(someOtherResult, now))
     expect(transitionForOtherId).toEqual(awaitingNextResult)
@@ -40,7 +40,7 @@ describe('AsyncResult', () => {
     const resultArrived = new ResultArrived(someResult, now)
 
     try {
-      const afterTransition = resultArrived.resultArrived(someId, someOtherResult, now)
+      const afterTransition = AsyncResult.resultArrived(resultArrived, someId, someOtherResult, now)
       fail()
     } catch (e) {
       expect(e.message).toEqual('Result has already arrived!')
