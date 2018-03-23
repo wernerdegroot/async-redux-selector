@@ -4,7 +4,7 @@ export const RESULT_ARRIVED = 'RESULT_ARRIVED'
 
 export class AwaitingFirstResult<R> {
 
-  public readonly type = AWAITING_FIRST_RESULT
+  public readonly type: 'AWAITING_FIRST_RESULT' = AWAITING_FIRST_RESULT
 
   constructor(public readonly requestId: string) { }
 
@@ -19,7 +19,7 @@ export class AwaitingFirstResult<R> {
 
 export class AwaitingNextResult<R> {
 
-  public readonly type = AWAITING_NEXT_RESULT
+  public readonly type: 'AWAITING_NEXT_RESULT' = AWAITING_NEXT_RESULT
 
   constructor(public readonly requestId: string, public readonly previousResult: R) { }
 
@@ -34,7 +34,7 @@ export class AwaitingNextResult<R> {
 
 export class ResultArrived<R> {
 
-  public readonly type = RESULT_ARRIVED
+  public readonly type: 'RESULT_ARRIVED' = RESULT_ARRIVED
 
   constructor(public readonly result: R, public readonly when: Date) { }
 

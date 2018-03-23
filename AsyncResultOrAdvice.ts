@@ -3,7 +3,7 @@ import { AsyncResult } from './AsyncResult'
 export const ADVICE = 'ADVICE'
 
 export interface IHasAdvice<Action> {
-  type: typeof ADVICE
+  type: 'ADVICE'
   followAdvice(dispatch: (action: Action) => void): void
 }
 

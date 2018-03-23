@@ -24,7 +24,7 @@ export class Resource<I, R, Action extends { type: string }> {
     }
   }
 
-  public reducer = (cache: Cache<I, R>, action: GenericAction): Cache<I, R> => {
+  public reducer = (cache: Cache<I, R> = [], action: GenericAction): Cache<I, R> => {
     if (isAwaitingResultAction<I>(action)) {
       return action.resourceId === this.resourceId
         ? awaitingResult(cache, this.inputEq, this.validityInMiliseconds, action.requestId, action.input)
