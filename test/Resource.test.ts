@@ -19,7 +19,7 @@ describe('Resource', () => {
       }
     }
 
-    const resource = new Resource<Input, Result, GenericAction>(someResourceId, runner, inputEq, bigLifetime)
+    const resource = new Resource<Input, Result, GenericAction>(someResourceId, runner, inputEq, bigLifetime, 2)
 
     const asyncResultOrAdvice = resource.selector([], someInput)
 

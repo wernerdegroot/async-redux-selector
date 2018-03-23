@@ -1,4 +1,4 @@
-import { awaitingResult, Cache, getAsyncResultIfValid, resultArrived } from './Cache'
+import { awaitingResult, Cache, getAsyncResultIfValid, resultArrived, truncate } from './Cache'
 import { v4 as uuid } from 'uuid'
 import { ADVICE, AsyncResultOrAdvice, HasAdvice } from './AsyncResultOrAdvice'
 import { CacheItem } from './CacheItem' // Required to prevent compile error.
@@ -10,7 +10,8 @@ export class Resource<I, R, Action extends { type: string }> {
   constructor(public readonly resourceId: string,
               private readonly runner: (input: I) => Promise<R>,
               private readonly inputEq: (left: I, right: I) => boolean,
-              private readonly validityInMiliseconds: number = 24 * 60 * 60 * 1000) {
+              private readonly validityInMiliseconds: number,
+              private readonly maxNumberOfCacheItems: number) {
 
   }
 
@@ -30,9 +31,11 @@ export class Resource<I, R, Action extends { type: string }> {
         ? awaitingResult(cache, this.inputEq, this.validityInMiliseconds, action.requestId, action.input)
         : cache
     } else if (isResultArrivedAction<I, R>(action)) {
-      return action.resourceId === this.resourceId
-        ? resultArrived(cache, this.inputEq, action.requestId, action.input, action.result, action.currentTime)
-        : cache
+      if (action.resourceId === this.resourceId) {
+        return truncate(resultArrived(cache, this.inputEq, action.requestId, action.input, action.result, action.currentTime), this.maxNumberOfCacheItems)
+      } else {
+        return cache
+      }
     } else {
       return cache
     }

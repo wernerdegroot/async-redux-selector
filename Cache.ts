@@ -1,5 +1,5 @@
 import { CacheItem } from './CacheItem'
-import { AsyncResult, AwaitingFirstResult, AwaitingNextResult } from './AsyncResult'
+import { AsyncResult, AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from './AsyncResult'
 
 export type Cache<I, R> = Array<CacheItem<I, R>>
 
@@ -48,4 +48,21 @@ export function resultArrived<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) 
     }
   })
   return items
+}
+
+export function truncate<I, R>(cache: Cache<I, R>, maxNumberOfCacheItems: number): Cache<I, R> {
+  const sortedCache = cache.sort((left, right) => {
+    if (left.asyncResult.type === RESULT_ARRIVED && right.asyncResult.type === RESULT_ARRIVED) {
+      return right.asyncResult.when.valueOf() - left.asyncResult.when.valueOf()
+    } if (left.asyncResult.type !== RESULT_ARRIVED) {
+      return -1
+    } else {
+      return 1
+    }
+  })
+
+  const resultArriveds = cache.filter(ci => ci.asyncResult.type === RESULT_ARRIVED).length
+  const toRemove = Math.max(0, resultArriveds - maxNumberOfCacheItems)
+  const toKeep = cache.length - toRemove
+  return sortedCache.slice(0, toKeep)
 }
