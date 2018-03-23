@@ -18,6 +18,17 @@ export abstract class HasAdvice<Action> {
 export type AsyncResultOrAdvice<R, Action> = AsyncResult<R> | HasAdvice<Action>
 
 export const AsyncResultOrAdvice = {
+
+  getOrElse<R, Action>(aroa: AsyncResultOrAdvice<R, Action>, alternative: R): R {
+    if (aroa.type === AWAITING_NEXT_RESULT) {
+      return aroa.previousResult
+    } else if (aroa.type === RESULT_ARRIVED) {
+      return aroa.result
+    } else {
+      return alternative
+    }
+  },
+
   map<A, B, Action>(fn: (a: A) => B, aroa: AsyncResultOrAdvice<A, Action>): AsyncResultOrAdvice<B, Action> {
     if (aroa.type === ADVICE) {
       return aroa
