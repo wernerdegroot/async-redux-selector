@@ -1,6 +1,6 @@
 {
   "name": "async-redux-selector",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Asynchronous Redux selectors",
   "main": "index.js",
   "scripts": {
