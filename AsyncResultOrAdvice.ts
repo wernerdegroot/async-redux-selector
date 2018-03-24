@@ -17,7 +17,28 @@ export abstract class HasAdvice<Action> {
 
 export type AsyncResultOrAdvice<R, Action> = AsyncResult<R> | HasAdvice<Action>
 
+export class AsyncResultOrAdvicePipe<R, Action> {
+
+  constructor(public readonly value: AsyncResultOrAdvice<R, Action>) { }
+
+  getOrElse(alternative: R): R {
+    return AsyncResultOrAdvice.getOrElse(this.value, alternative)
+  }
+
+  map<RR>(fn: (r: R) => RR): AsyncResultOrAdvicePipe<RR, Action> {
+    return new AsyncResultOrAdvicePipe(AsyncResultOrAdvice.map(this.value, fn))
+  }
+
+  flatMap<RR>(fn: (r: R) => AsyncResultOrAdvice<RR, Action>): AsyncResultOrAdvicePipe<RR, Action> {
+    return new AsyncResultOrAdvicePipe(AsyncResultOrAdvice.flatMap(this.value, fn))
+  }
+}
+
 export const AsyncResultOrAdvice = {
+
+  of<R, Action>(aroa: AsyncResultOrAdvice<R, Action>): AsyncResultOrAdvicePipe<R, Action> {
+    return new AsyncResultOrAdvicePipe(aroa)
+  },
 
   getOrElse<R, Action>(aroa: AsyncResultOrAdvice<R, Action>, alternative: R): R {
     if (aroa.type === AWAITING_NEXT_RESULT) {
@@ -29,7 +50,7 @@ export const AsyncResultOrAdvice = {
     }
   },
 
-  map<A, B, Action>(fn: (a: A) => B, aroa: AsyncResultOrAdvice<A, Action>): AsyncResultOrAdvice<B, Action> {
+  map<A, B, Action>(aroa: AsyncResultOrAdvice<A, Action>, fn: (a: A) => B): AsyncResultOrAdvice<B, Action> {
     if (aroa.type === ADVICE) {
       return aroa
     } else if (aroa.type === AWAITING_FIRST_RESULT) {
@@ -44,7 +65,7 @@ export const AsyncResultOrAdvice = {
     }
   },
 
-  flatMap<A, B, Action>(fn: (a: A) => AsyncResultOrAdvice<B, Action>, aroa: AsyncResultOrAdvice<A, Action>): AsyncResultOrAdvice<B, Action> {
+  flatMap<A, B, Action>(aroa: AsyncResultOrAdvice<A, Action>, fn: (a: A) => AsyncResultOrAdvice<B, Action>): AsyncResultOrAdvice<B, Action> {
     if (aroa.type === ADVICE) {
       return aroa
     } else if (aroa.type === AWAITING_FIRST_RESULT) {
