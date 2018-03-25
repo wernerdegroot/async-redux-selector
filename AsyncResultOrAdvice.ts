@@ -34,14 +34,14 @@ export class DefaultHasAdvice<I, R, Action, State> {
     private readonly requestId: string
   ) { }
 
-  followAdvice(dispatch: (action: ResourceAction<I, R>) => void): void {
+  followAdvice = (dispatch: (action: ResourceAction<I, R>) => void): void => {
     dispatch(awaitingResultAction(this.resourceId, this.requestId, this.input, new Date()))
     this.runner(this.input).then(result => {
       dispatch(resultArrivedAction(this.resourceId, this.requestId, this.input, result, new Date()))
     })
   }
 
-  followAdviceThunk(dispatch: (action: ResourceAction<I, R>) => void, getState: () => State): void {
+  followAdviceThunk = (dispatch: (action: ResourceAction<I, R>) => void, getState: () => State): void => {
     const cache = this.cacheSelector(getState())
     if (getAsyncResultIfValid(cache, this.inputEq, this.input, new Date()) === undefined) {
       this.followAdvice(dispatch)
