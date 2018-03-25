@@ -1,25 +1,26 @@
 import { awaitingResult, Cache, getAsyncResultIfValid, resultArrived, truncate } from './Cache'
 import { v4 as uuid } from 'uuid'
-import { ADVICE, AsyncResultOrAdvice, HasAdvice } from './AsyncResultOrAdvice'
+import { ADVICE, AsyncResultOrAdvice, DefaultHasAdvice, IHasAdvice } from './AsyncResultOrAdvice'
 import { CacheItem } from './CacheItem' // Required to prevent compile error.
 import { GenericAction, isAwaitingResultAction, isResultArrivedAction } from './Action'
-import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
+import { ResourceAction } from './Action'
 
-export class Resource<I, R, Action extends { type: string }> {
+export class Resource<I, R, Action extends { type: string }, State> {
 
   constructor(public readonly resourceId: string,
               private readonly runner: (input: I) => Promise<R>,
+              private readonly cacheSelector: (state: State) => Cache<I, R>,
               private readonly inputEq: (left: I, right: I) => boolean,
               private readonly validityInMiliseconds: number,
               private readonly maxNumberOfCacheItems: number) {
 
   }
 
-  public selector = (cache: Cache<I, R>, input: I): AsyncResultOrAdvice<R, ResourceAction<I, R>> => {
+  public selector = (cache: Cache<I, R>, input: I): AsyncResultOrAdvice<R, ResourceAction<I, R>, State> => {
     const now = new Date()
     const possibleAsyncResult = getAsyncResultIfValid(cache, this.inputEq, input, now)
     if (possibleAsyncResult === undefined) {
-      return this.getAdvice(input, now)
+      return this.getAdvice(input)
     } else {
       return possibleAsyncResult
     }
@@ -41,21 +42,15 @@ export class Resource<I, R, Action extends { type: string }> {
     }
   }
 
-  private getAdvice(input: I, now: Date): HasAdvice<ResourceAction<I, R>> {
-    const self = this
+  private getAdvice(input: I): IHasAdvice<ResourceAction<I, R>, State> {
     const requestId = uuid()
-    return new class extends HasAdvice<ResourceAction<I, R>> {
-
-      constructor() {
-        super()
-      }
-
-      followAdvice(dispatch: (action: ResourceAction<I, R>) => void): void {
-        dispatch(awaitingResultAction(self.resourceId, requestId, input, now))
-        self.runner(input).then(result => {
-          dispatch(resultArrivedAction(self.resourceId, requestId, input, result, new Date()))
-        })
-      }
-    }
+    return new DefaultHasAdvice(
+      this.runner,
+      this.cacheSelector,
+      this.inputEq,
+      input,
+      this.resourceId,
+      requestId
+    )
   }
 }

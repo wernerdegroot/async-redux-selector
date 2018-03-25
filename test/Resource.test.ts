@@ -2,8 +2,9 @@ import { Resource } from '../Resource'
 import { GenericAction } from '../Action'
 import { ADVICE } from '../AsyncResultOrAdvice'
 import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
-import { bigLifetime, Input, inputEq, Result, someInput, someResourceId, someResult } from './data'
+import { bigLifetime, Input, inputEq, Result, someInput, someResourceId, someResult, State } from './data'
 import { defer } from './IDeferred'
+import { Cache } from '../Cache'
 
 describe('Resource', () => {
 
@@ -19,7 +20,18 @@ describe('Resource', () => {
       }
     }
 
-    const resource = new Resource<Input, Result, GenericAction>(someResourceId, runner, inputEq, bigLifetime, 2)
+    function cacheSelector(state: State): Cache<Input, Result> {
+      return state.cache
+    }
+
+    const resource = new Resource<Input, Result, GenericAction, State>(
+      someResourceId,
+      runner,
+      cacheSelector,
+      inputEq,
+      bigLifetime,
+      2
+    )
 
     const asyncResultOrAdvice = resource.selector([], someInput)
 

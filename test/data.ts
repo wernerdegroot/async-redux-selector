@@ -1,4 +1,5 @@
 import { addMilliseconds } from 'date-fns'
+import { Cache } from '../Cache'
 
 export type Input = {
   inputValue: string
@@ -30,6 +31,10 @@ export const someResult: Result = {
 
 export const someOtherResult: Result = {
   resultValue: 5
+}
+
+export type State = {
+  cache: Cache<Input, Result>
 }
 
 export const someRequestId = 'some-request-id'
