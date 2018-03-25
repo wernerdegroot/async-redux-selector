@@ -1,4 +1,4 @@
-import { awaitingResult, Cache, clear, getAsyncResultIfValid, resultArrived } from '../Cache'
+import { awaitingResult, Cache, clear, getAsyncResultIfValid, resultArrived, truncate } from '../Cache'
 import { AwaitingFirstResult, AwaitingNextResult, ResultArrived } from '../AsyncResult'
 import {
   bigLifetime,
@@ -15,6 +15,7 @@ import {
   someRequestId,
   someResult
 } from './data'
+import { max, addSeconds } from 'date-fns';
 
 describe('Cache', () => {
   it('should initially be empty', () => {
@@ -99,5 +100,30 @@ describe('Cache', () => {
     cache = resultArrived(cache, inputEq, someOtherRequestId, someOtherInput, someOtherResult, later)
     expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, later))
     expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new ResultArrived(someOtherResult, later))
+  })
+
+  it('should only contain the maximum number of items', () => {
+    let cache: Cache<Input, Result> = []
+    const maxNumberOfItems = 4
+    for (let i = 0; i < maxNumberOfItems; ++i) {
+      const input: Input = { inputValue: 'input-' + i }
+      const result: Result = { resultValue: i }
+      const requestId = 'request-' + i
+      const time = addSeconds(later, i)
+      cache = awaitingResult(cache, inputEq, bigLifetime, requestId, input)
+      cache = resultArrived(cache, inputEq, requestId, input, result, time)
+    }
+
+    expect(cache.length).toEqual(maxNumberOfItems)
+
+    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
+    cache = truncate(cache, maxNumberOfItems)
+    expect(cache.length).toEqual(maxNumberOfItems + 1)
+
+    const timeSomeResultArrived = addSeconds(later, maxNumberOfItems + 1)
+    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, timeSomeResultArrived)
+    cache = truncate(cache, maxNumberOfItems)
+    expect(cache.length).toEqual(maxNumberOfItems)
+    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, timeSomeResultArrived))
   })
 })
