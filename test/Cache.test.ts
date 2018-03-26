@@ -103,27 +103,27 @@ describe('Cache', () => {
   })
 
   it('should only contain the maximum number of items', () => {
-    let cache: Cache<Input, Result> = []
+    let cache: Cache<Key, Result> = []
     const maxNumberOfItems = 4
     for (let i = 0; i < maxNumberOfItems; ++i) {
-      const input: Input = { inputValue: 'input-' + i }
+      const key: Key = 'key-' + i
       const result: Result = { resultValue: i }
       const requestId = 'request-' + i
       const time = addSeconds(later, i)
-      cache = awaitingResult(cache, inputEq, bigLifetime, requestId, input)
-      cache = resultArrived(cache, inputEq, requestId, input, result, time)
+      cache = awaitingResult(cache, keysAreEqual, bigLifetime, requestId, key)
+      cache = resultArrived(cache, keysAreEqual, requestId, key, result, time)
     }
 
     expect(cache.length).toEqual(maxNumberOfItems)
 
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
     cache = truncate(cache, maxNumberOfItems)
     expect(cache.length).toEqual(maxNumberOfItems + 1)
 
     const timeSomeResultArrived = addSeconds(later, maxNumberOfItems + 1)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, timeSomeResultArrived)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, timeSomeResultArrived)
     cache = truncate(cache, maxNumberOfItems)
     expect(cache.length).toEqual(maxNumberOfItems)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, timeSomeResultArrived))
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someResult, timeSomeResultArrived))
   })
 })
