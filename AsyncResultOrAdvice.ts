@@ -11,9 +11,6 @@ import { getAsyncResultIfValid, Cache } from './Cache'
 
 export const ADVICE = 'ADVICE'
 
-export type Dispatcher<Action> = (action: Action) => Promise<void>
-export type ThunkAction<Action, State> = (dispatch: Dispatcher<Action>, getState: () => State) => Promise<void>
-
 export interface IAdvice<Action, State> {
   readonly type: 'ADVICE'
 

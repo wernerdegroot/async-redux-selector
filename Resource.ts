@@ -1,9 +1,65 @@
 import { awaitingResult, Cache, getAsyncResultIfValid, resultArrived, truncate } from './Cache'
 import { v4 as uuid } from 'uuid'
-import { ADVICE, AsyncResultOrAdvice, DefaultAdvice, IAdvice } from './AsyncResultOrAdvice'
+import { AsyncResultOrAdvice, DefaultAdvice, IAdvice } from './AsyncResultOrAdvice'
 import { CacheItem } from './CacheItem' // Required to prevent compile error.
 import { GenericAction, isAwaitingResultAction, isResultArrivedAction } from './Action'
 import { ResourceAction } from './Action'
+
+const DEFAULT_VALIDITY_IN_MILISECONDS = 60 * 60 * 1000
+const DEFAULT_MAX_NUMBER_OF_CACHE_ITEMS = 5
+
+export interface ICreateResourceParam<Input, Key, Result, Action extends { type: string }, State> {
+  resourceId: string
+  runner: (input: Input, getState: () => State) => Promise<Result>
+  inputToKey: (input: Input) => Key
+  cacheSelector: (state: State) => Cache<Key, Result>
+  keysAreEqual?: (left: Key, right: Key) => boolean
+  validityInMiliseconds?: number
+  maxNumberOfCacheItems?: number
+}
+
+export function createResource<Input, Key, Result, Action extends { type: string }, State>(p: ICreateResourceParam<Input, Key, Result, Action, State>) {
+
+  function defaultKeysAreEqual(left: Key, right: Key) {
+    return left === right
+  }
+
+  return new Resource<Input, Key, Result, Action, State>(
+    p.resourceId,
+    p.runner,
+    p.inputToKey,
+    p.cacheSelector,
+    p.keysAreEqual === undefined ? defaultKeysAreEqual : p.keysAreEqual,
+    p.validityInMiliseconds === undefined ? DEFAULT_VALIDITY_IN_MILISECONDS : p.validityInMiliseconds,
+    p.maxNumberOfCacheItems === undefined ? DEFAULT_MAX_NUMBER_OF_CACHE_ITEMS : p.maxNumberOfCacheItems
+  )
+}
+
+export interface ICreateResourceShortParam<Input, Result, Action extends { type: string }, State> {
+  resourceId: string
+  runner: (input: Input, getState: () => State) => Promise<Result>
+  cacheSelector: (state: State) => Cache<Input, Result>
+  inputsAreEqual?: (left: Input, right: Input) => boolean
+  validityInMiliseconds?: number
+  maxNumberOfCacheItems?: number
+}
+
+export function createResourceShort<Input, Result, Action extends { type: string }, State>(p: ICreateResourceShortParam<Input, Result, Action, State>) {
+
+  function defaultInputsAreEqual(left: Input, right: Input) {
+    return left === right
+  }
+
+  return new Resource<Input, Input, Result, Action, State>(
+    p.resourceId,
+    p.runner,
+    (input: Input) => input,
+    p.cacheSelector,
+    p.inputsAreEqual === undefined ? defaultInputsAreEqual : p.inputsAreEqual,
+    p.validityInMiliseconds === undefined ? DEFAULT_VALIDITY_IN_MILISECONDS : p.validityInMiliseconds,
+    p.maxNumberOfCacheItems === undefined ? DEFAULT_MAX_NUMBER_OF_CACHE_ITEMS : p.maxNumberOfCacheItems
+  )
+}
 
 export class Resource<Input, Key, Result, Action extends { type: string }, State> {
 
