@@ -1,5 +1,5 @@
 import { GenericAction, isAwaitingResultAction, isResultArrivedAction } from '../Action'
-import { Input, inputEq, Result, resultEq } from './data'
+import { Input, Result, resultEq } from './data'
 
 export type IMatcher<A> = (a: A) => true | string
 
@@ -32,22 +32,22 @@ export const matchesAll = <A>(matchers: Array<IMatcher<A>>): IMatcher<A[]> => (a
   return true
 }
 
-export const matchAwaitingResult = (input: Input): IMatcher<GenericAction> => (action: GenericAction) => {
-  if (isAwaitingResultAction<Input>(action)) {
-    if (inputEq(action.input, input)) {
+export const matchAwaitingResult = (key: string): IMatcher<GenericAction> => (action: GenericAction) => {
+  if (isAwaitingResultAction<string>(action)) {
+    if (action.key === key) {
       return true
     } else {
-      return `Input ${JSON.stringify(action.input)} not equal to ${JSON.stringify(input)}`
+      return `Input ${JSON.stringify(action.key)} not equal to ${JSON.stringify(key)}`
     }
   } else {
     return `Not 'AWAITING_RESULT_ACTION'`
   }
 }
 
-export const matchResultArrived = (input: Input, result: Result): IMatcher<GenericAction> => (action: GenericAction) => {
-  if (isResultArrivedAction<Input, Result>(action)) {
-    if (!inputEq(action.input, input)) {
-      return `Input ${JSON.stringify(action.input)} not equal to ${JSON.stringify(input)}`
+export const matchResultArrived = (key: string, result: Result): IMatcher<GenericAction> => (action: GenericAction) => {
+  if (isResultArrivedAction<string, Result>(action)) {
+    if (action.key !== key) {
+      return `Key ${JSON.stringify(action.key)} not equal to ${JSON.stringify(key)}`
     } else if (!resultEq(action.result, result)) {
       return `Result ${JSON.stringify(action.result)} not equal to ${JSON.stringify(result)}`
     } else {

@@ -2,11 +2,17 @@ import { addMilliseconds } from 'date-fns'
 import { Cache } from '../Cache'
 
 export type Input = {
-  inputValue: string
+  key: string
 }
 
-export function inputEq(left: Input, right: Input): boolean {
-  return left.inputValue === right.inputValue
+export type Key = string
+
+export function inputToKey(input: Input): Key {
+  return input.key + "-as-key"
+}
+
+export function keysAreEqual(left: Key, right: Key): boolean {
+  return left === right
 }
 
 export type Result = {
@@ -17,12 +23,15 @@ export function resultEq(left: Result, right: Result): boolean {
   return left.resultValue === right.resultValue
 }
 
+export const someKey = 'some-key'
+export const someOtherKey = 'some-other-key'
+
 export const someInput: Input = {
-  inputValue: 'some-input'
+  key: someKey
 }
 
 export const someOtherInput: Input = {
-  inputValue: 'some-other-input'
+  key: someOtherKey
 }
 
 export const someResult: Result = {
@@ -34,7 +43,7 @@ export const someOtherResult: Result = {
 }
 
 export type State = {
-  cache: Cache<Input, Result>
+  cache: Cache<string, Result>
 }
 
 export const someRequestId = 'some-request-id'

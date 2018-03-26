@@ -4,52 +4,52 @@ export interface GenericAction {
 
 export const AWAITING_RESULT = 'AWAITING_RESULT'
 
-export interface IAwaitingResultAction<I> {
+export interface IAwaitingResultAction<Key> {
   type: typeof AWAITING_RESULT
   resourceId: string
   requestId: string
-  input: I
+  key: Key
   currentTime: Date
 }
 
-export function awaitingResultAction<I>(resourceId: string, requestId: string, input: I, currentTime: Date): IAwaitingResultAction<I> {
+export function awaitingResultAction<Key>(resourceId: string, requestId: string, key: Key, currentTime: Date): IAwaitingResultAction<Key> {
   return {
     type: AWAITING_RESULT,
     resourceId,
     requestId,
-    input,
+    key,
     currentTime
   }
 }
 
-export function isAwaitingResultAction<I>(action: GenericAction): action is IAwaitingResultAction<I> {
+export function isAwaitingResultAction<Key>(action: GenericAction): action is IAwaitingResultAction<Key> {
   return action.type === AWAITING_RESULT
 }
 
 export const RESULT_ARRIVED = 'RESULT_ARRIVED'
 
-export interface IResultArrivedAction<I, R> {
+export interface IResultArrivedAction<Key, Result> {
   type: typeof RESULT_ARRIVED
   resourceId: string
   requestId: string
-  input: I
-  result: R
+  key: Key
+  result: Result
   currentTime: Date
 }
 
-export function resultArrivedAction<I, R>(resourceId: string, requestId: string, input: I, result: R, currentTime: Date): IResultArrivedAction<I, R> {
+export function resultArrivedAction<Key, Result>(resourceId: string, requestId: string, key: Key, result: Result, currentTime: Date): IResultArrivedAction<Key, Result> {
   return {
     type: RESULT_ARRIVED,
     resourceId,
     requestId,
-    input,
+    key,
     result,
     currentTime
   }
 }
 
-export function isResultArrivedAction<I, R>(action: GenericAction): action is IResultArrivedAction<I, R> {
+export function isResultArrivedAction<Key, Result>(action: GenericAction): action is IResultArrivedAction<Key, Result> {
   return action.type === RESULT_ARRIVED
 }
 
-export type ResourceAction<I, R> = IAwaitingResultAction<I> | IResultArrivedAction<I, R>
+export type ResourceAction<Key, Result> = IAwaitingResultAction<Key> | IResultArrivedAction<Key, Result>

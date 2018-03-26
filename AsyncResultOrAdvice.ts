@@ -11,71 +11,68 @@ import { getAsyncResultIfValid, Cache } from './Cache'
 
 export const ADVICE = 'ADVICE'
 
-export type Dispatcher<Action> = (action: Action) => void
-export type ThunkAction<Action, State> = (dispatch: Dispatcher<Action>, getState: () => State) => void
+export type Dispatcher<Action> = (action: Action) => Promise<void>
+export type ThunkAction<Action, State> = (dispatch: Dispatcher<Action>, getState: () => State) => Promise<void>
 
-export interface IHasAdvice<Action, State> {
+export interface IAdvice<Action, State> {
   readonly type: 'ADVICE'
 
-  followAdvice(dispatch: (action: Action) => void): void
-
-  followAdviceThunk(dispatch: (action: Action) => void, getState: () => State): void
+  followAdvice(dispatch: (action: Action) => void, getState: () => State): Promise<void>
 }
 
-export class DefaultHasAdvice<I, R, Action, State> {
+export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<ResourceAction<Key, Result>, State> {
   readonly type: 'ADVICE' = ADVICE
 
-  constructor(
-    private readonly runner: (input: I) => Promise<R>,
-    private readonly cacheSelector: (state: State) => Cache<I, R>,
-    private readonly inputEq: (left: I, right: I) => boolean,
-    private readonly input: I,
-    private readonly resourceId: string,
-    private readonly requestId: string
-  ) { }
-
-  followAdvice = (dispatch: (action: ResourceAction<I, R>) => void): void => {
-    dispatch(awaitingResultAction(this.resourceId, this.requestId, this.input, new Date()))
-    this.runner(this.input).then(result => {
-      dispatch(resultArrivedAction(this.resourceId, this.requestId, this.input, result, new Date()))
-    })
+  constructor(private readonly runner: (input: Input, getState: () => State) => Promise<Result>,
+              private readonly cacheSelector: (state: State) => Cache<Key, Result>,
+              private readonly inputToKey: (input: Input) => Key,
+              private readonly keysAreEqual: (left: Key, right: Key) => boolean,
+              private readonly input: Input,
+              private readonly resourceId: string,
+              private readonly requestId: string) {
   }
 
-  followAdviceThunk = (dispatch: (action: ResourceAction<I, R>) => void, getState: () => State): void => {
+  followAdvice = (dispatch: (action: ResourceAction<Key, Result>) => void, getState: () => State): Promise<void> => {
+    const key = this.inputToKey(this.input)
     const cache = this.cacheSelector(getState())
-    if (getAsyncResultIfValid(cache, this.inputEq, this.input, new Date()) === undefined) {
-      this.followAdvice(dispatch)
+    if (getAsyncResultIfValid(cache, this.keysAreEqual, key, new Date()) === undefined) {
+      dispatch(awaitingResultAction(this.resourceId, this.requestId, key, new Date()))
+      return this.runner(this.input, getState).then(result => {
+        dispatch(resultArrivedAction(this.resourceId, this.requestId, key, result, new Date()))
+      })
+    } else {
+      return Promise.resolve()
     }
   }
 }
 
-export type AsyncResultOrAdvice<R, Action, State> = AsyncResult<R> | IHasAdvice<Action, State>
+export type AsyncResultOrAdvice<Result, Action, State> = AsyncResult<Result> | IAdvice<Action, State>
 
-export class AsyncResultOrAdvicePipe<R, Action, State> {
+export class AsyncResultOrAdvicePipe<A, Action, State> {
 
-  constructor(public readonly value: AsyncResultOrAdvice<R, Action, State>) {
+  constructor(public readonly value: AsyncResultOrAdvice<A, Action, State>) {
   }
 
-  getOrElse(alternative: R): R {
+  getOrElse(alternative: A): A {
     return AsyncResultOrAdvice.getOrElse(this.value, alternative)
   }
 
-  map<RR>(fn: (r: R) => RR): AsyncResultOrAdvicePipe<RR, Action, State> {
+  map<B>(fn: (result: A) => B): AsyncResultOrAdvicePipe<B, Action, State> {
     return new AsyncResultOrAdvicePipe(AsyncResultOrAdvice.map(this.value, fn))
   }
 
-  flatMap<RR>(fn: (r: R) => AsyncResultOrAdvice<RR, Action, State>): AsyncResultOrAdvicePipe<RR, Action, State> {
+  flatMap<B>(fn: (result: A) => AsyncResultOrAdvice<B, Action, State>): AsyncResultOrAdvicePipe<B, Action, State> {
     return new AsyncResultOrAdvicePipe(AsyncResultOrAdvice.flatMap(this.value, fn))
   }
 }
 
 export const AsyncResultOrAdvice = {
 
-  of<R, Action, State>(aroa: AsyncResultOrAdvice<R, Action, State>): AsyncResultOrAdvicePipe<R, Action, State> {
+  of<A, Action, State>(aroa: AsyncResultOrAdvice<A, Action, State>): AsyncResultOrAdvicePipe<A, Action, State> {
     return new AsyncResultOrAdvicePipe(aroa)
   },
 
-  getOrElse<R, Action, State>(aroa: AsyncResultOrAdvice<R, Action, State>, alternative: R): R {
+  getOrElse<A, Action, State>(aroa: AsyncResultOrAdvice<A, Action, State>, alternative: A): A {
     if (aroa.type === AWAITING_NEXT_RESULT) {
       return aroa.previousResult
     } else if (aroa.type === RESULT_ARRIVED) {

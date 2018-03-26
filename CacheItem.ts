@@ -1,25 +1,26 @@
 import { addMilliseconds } from 'date-fns'
 import { AsyncResult } from './AsyncResult'
+import { RESULT_ARRIVED } from './Action'
 
-export class CacheItem<I, R> {
+export class CacheItem<Key, Value> {
 
-  constructor(public readonly input: I,
-              public readonly asyncResult: AsyncResult<R>,
+  constructor(public readonly key: Key,
+              public readonly asyncResult: AsyncResult<Value>,
               public readonly lifeTimeInMiliseconds: number,
               public readonly forcedInvalid: boolean) {
   }
 
-  public forceInvalid(): CacheItem<I, R> {
-    return new CacheItem(this.input, this.asyncResult, this.lifeTimeInMiliseconds, true)
+  public forceInvalid(): CacheItem<Key, Value> {
+    return new CacheItem(this.key, this.asyncResult, this.lifeTimeInMiliseconds, true)
   }
 
-  public resultArrived(id: string, result: R, now: Date): CacheItem<I, R> {
+  public resultArrived(id: string, result: Value, now: Date): CacheItem<Key, Value> {
     const asyncResult = AsyncResult.resultArrived(this.asyncResult, id, result, now)
-    return new CacheItem<I, R>(this.input, asyncResult, this.lifeTimeInMiliseconds, false)
+    return new CacheItem<Key, Value>(this.key, asyncResult, this.lifeTimeInMiliseconds, false)
   }
 
   public isValid(now: Date): boolean {
-    if (this.asyncResult.type === 'RESULT_ARRIVED') {
+    if (this.asyncResult.type === RESULT_ARRIVED) {
       return !this.forcedInvalid && now < addMilliseconds(this.asyncResult.when, this.lifeTimeInMiliseconds)
     } else {
       return true

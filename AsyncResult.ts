@@ -26,13 +26,13 @@ export class ResultArrived<R> {
   }
 }
 
-export type AsyncResult<R> = AwaitingFirstResult | AwaitingNextResult<R> | ResultArrived<R>
+export type AsyncResult<Result> = AwaitingFirstResult | AwaitingNextResult<Result> | ResultArrived<Result>
 
 export const AsyncResult = {
-  resultArrived<R>(asyncResult: AsyncResult<R>, id: string, r: R, now: Date): AsyncResult<R> {
+  resultArrived<Result>(asyncResult: AsyncResult<Result>, id: string, result: Result, now: Date): AsyncResult<Result> {
     if (asyncResult.type === AWAITING_FIRST_RESULT || asyncResult.type === AWAITING_NEXT_RESULT) {
       if (asyncResult.requestId === id) {
-        return new ResultArrived(r, now)
+        return new ResultArrived(result, now)
       } else {
         return asyncResult
       }

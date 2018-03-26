@@ -2,14 +2,14 @@ import { awaitingResult, Cache, clear, getAsyncResultIfValid, resultArrived, tru
 import { AwaitingFirstResult, AwaitingNextResult, ResultArrived } from '../AsyncResult'
 import {
   bigLifetime,
-  Input,
-  inputEq,
+  Key,
+  keysAreEqual,
   later,
   now,
   Result,
   smallLifetime,
-  someInput,
-  someOtherInput,
+  someKey,
+  someOtherKey,
   someOtherRequestId,
   someOtherResult,
   someRequestId,
@@ -19,87 +19,87 @@ import { max, addSeconds } from 'date-fns';
 
 describe('Cache', () => {
   it('should initially be empty', () => {
-    const cache: Cache<Input, Result> = []
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(undefined)
+    const cache: Cache<Key, Result> = []
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(undefined)
   })
 
   it('should be able to hold a pending request', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingFirstResult(someRequestId))
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new AwaitingFirstResult(someRequestId))
   })
 
   it('should be able to hold a response', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, now)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, now))
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, now)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someResult, now))
   })
 
   it('should be able to hold a response, but only until its lifetime has passed', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, smallLifetime, someRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, now)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(undefined)
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, smallLifetime, someRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, now)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(undefined)
   })
 
   it('should be able to hold the previous response, when a new request was made', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, now)
-    cache = awaitingResult(cache, inputEq, bigLifetime, someOtherRequestId, someInput)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, now)
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someOtherRequestId, someKey)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
   })
 
   it('should be able to hold the previous response, when a new request was made, even if the lifetime of the previous response has passed', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, smallLifetime, someRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, now)
-    cache = awaitingResult(cache, inputEq, smallLifetime, someOtherRequestId, someInput)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, smallLifetime, someRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, now)
+    cache = awaitingResult(cache, keysAreEqual, smallLifetime, someOtherRequestId, someKey)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
   })
 
   it('should be clearable', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, now)
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, now)
     cache = clear(cache)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(undefined)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(undefined)
   })
 
   it('should be able to hold the previous response, when a new request was made, even if the cache was cleared', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, now)
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, now)
     cache = clear(cache)
-    cache = awaitingResult(cache, inputEq, bigLifetime, someOtherRequestId, someInput)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someOtherRequestId, someKey)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
   })
 
   it('should be able to handle race conditions', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    cache = awaitingResult(cache, inputEq, bigLifetime, someOtherRequestId, someInput)
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, later)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
-    cache = resultArrived(cache, inputEq, someOtherRequestId, someInput, someOtherResult, later)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someOtherResult, later))
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someOtherRequestId, someKey)
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, later)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+    cache = resultArrived(cache, keysAreEqual, someOtherRequestId, someKey, someOtherResult, later)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someOtherResult, later))
   })
 
   it('should be able to handle multiple requests', () => {
-    let cache: Cache<Input, Result> = []
-    cache = awaitingResult(cache, inputEq, bigLifetime, someRequestId, someInput)
-    cache = awaitingResult(cache, inputEq, bigLifetime, someOtherRequestId, someOtherInput)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new AwaitingFirstResult(someRequestId))
-    expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+    let cache: Cache<Key, Result> = []
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someRequestId, someKey)
+    cache = awaitingResult(cache, keysAreEqual, bigLifetime, someOtherRequestId, someOtherKey)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new AwaitingFirstResult(someRequestId))
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someOtherKey, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
 
-    cache = resultArrived(cache, inputEq, someRequestId, someInput, someResult, later)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, later))
-    expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+    cache = resultArrived(cache, keysAreEqual, someRequestId, someKey, someResult, later)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someResult, later))
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someOtherKey, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
 
-    cache = resultArrived(cache, inputEq, someOtherRequestId, someOtherInput, someOtherResult, later)
-    expect(getAsyncResultIfValid(cache, inputEq, someInput, later)).toEqual(new ResultArrived(someResult, later))
-    expect(getAsyncResultIfValid(cache, inputEq, someOtherInput, later)).toEqual(new ResultArrived(someOtherResult, later))
+    cache = resultArrived(cache, keysAreEqual, someOtherRequestId, someOtherKey, someOtherResult, later)
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someResult, later))
+    expect(getAsyncResultIfValid(cache, keysAreEqual, someOtherKey, later)).toEqual(new ResultArrived(someOtherResult, later))
   })
 
   it('should only contain the maximum number of items', () => {

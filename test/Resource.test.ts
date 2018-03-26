@@ -2,7 +2,7 @@ import { Resource } from '../Resource'
 import { GenericAction } from '../Action'
 import { ADVICE } from '../AsyncResultOrAdvice'
 import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
-import { bigLifetime, Input, inputEq, Result, someInput, someResourceId, someResult, State } from './data'
+import { bigLifetime, Input, Result, someInput, someResourceId, someResult, State } from './data'
 import { defer } from './IDeferred'
 import { Cache } from '../Cache'
 
@@ -10,25 +10,32 @@ describe('Resource', () => {
 
   it('should produce an advice for requests that weren\'t made before', async () => {
 
+    const state: State = { cache: [] }
+
     const deferred = defer<Result>()
 
     function runner(input: Input): Promise<Result> {
-      if (inputEq(input, someInput)) {
+      if (input === someInput) {
         return deferred.promise
       } else {
         throw new Error('Should not happen!')
       }
     }
 
-    function cacheSelector(state: State): Cache<Input, Result> {
+    function cacheSelector(state: State): Cache<string, Result> {
       return state.cache
     }
 
-    const resource = new Resource<Input, Result, GenericAction, State>(
+    function inputToKey(input: Input): string {
+      return input.key
+    }
+
+    const resource = new Resource<Input, string, Result, GenericAction, State>(
       someResourceId,
       runner,
+      inputToKey,
       cacheSelector,
-      inputEq,
+      (left: string, right: string) => left === right,
       bigLifetime,
       2
     )
@@ -46,16 +53,16 @@ describe('Resource', () => {
       assert(actions).toMatch(matchesAll([]))
 
       // Start the request:
-      asyncResultOrAdvice.followAdvice(dispatch)
+      asyncResultOrAdvice.followAdvice(dispatch, () => state)
       assert(actions).toMatch(matchesAll([
-        matchAwaitingResult(someInput)
+        matchAwaitingResult(someInput.key)
       ]))
 
       // Response received:
       await deferred.resolve(someResult)
       assert(actions).toMatch(matchesAll([
-        matchAwaitingResult(someInput),
-        matchResultArrived(someInput, someResult)
+        matchAwaitingResult(someInput.key),
+        matchResultArrived(someInput.key, someResult)
       ]))
     } else {
       fail('Expected an advice')

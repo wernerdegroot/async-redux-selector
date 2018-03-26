@@ -1,14 +1,14 @@
 import { CacheItem } from './CacheItem'
 import { AsyncResult, AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from './AsyncResult'
 
-export type Cache<I, R> = Array<CacheItem<I, R>>
+export type Cache<Key, Value> = Array<CacheItem<Key, Value>>
 
-export function clear<I, R>(cache: Cache<I, R>): Cache<I, R> {
+export function clear<Key, Value>(cache: Cache<Key, Value>): Cache<Key, Value> {
   return cache.map(item => item.forceInvalid())
 }
 
-export function getAsyncResultIfValid<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) => boolean, input: I, now: Date): AsyncResult<R> | undefined {
-  const cacheItem = cache.find(item => eq(item.input, input))
+export function getAsyncResultIfValid<Key, Value>(cache: Cache<Key, Value>, eq: (left: Key, right: Key) => boolean, key: Key, now: Date): AsyncResult<Value> | undefined {
+  const cacheItem = cache.find(item => eq(item.key, key))
   if (cacheItem === undefined) {
     return undefined
   } else if (!cacheItem.isValid(now)) {
@@ -18,10 +18,10 @@ export function getAsyncResultIfValid<I, R>(cache: Cache<I, R>, eq: (left: I, ri
   }
 }
 
-export function awaitingResult<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) => boolean, lifeTimeInMiliseconds: number, requestId: string, input: I): Cache<I, R> {
-  const otherItems = cache.filter(item => !eq(item.input, input))
-  const previousCacheItem = cache.find(item => eq(item.input, input))
-  let asyncResult: AsyncResult<R>
+export function awaitingResult<Key, Value>(cache: Cache<Key, Value>, eq: (left: Key, right: Key) => boolean, lifeTimeInMiliseconds: number, requestId: string, key: Key): Cache<Key, Value> {
+  const otherItems = cache.filter(item => !eq(item.key, key))
+  const previousCacheItem = cache.find(item => eq(item.key, key))
+  let asyncResult: AsyncResult<Value>
   if (previousCacheItem === undefined) {
     asyncResult = new AwaitingFirstResult(requestId)
   } else if (previousCacheItem.asyncResult.type === 'RESULT_ARRIVED') {
@@ -34,14 +34,14 @@ export function awaitingResult<I, R>(cache: Cache<I, R>, eq: (left: I, right: I)
     const exhaustive: never = previousCacheItem.asyncResult
     throw exhaustive
   }
-  const newCacheItem = new CacheItem(input, asyncResult, lifeTimeInMiliseconds, false)
+  const newCacheItem = new CacheItem(key, asyncResult, lifeTimeInMiliseconds, false)
   const items = [...otherItems, newCacheItem]
   return items
 }
 
-export function resultArrived<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) => boolean, requestId: string, input: I, result: R, now: Date): Cache<I, R> {
+export function resultArrived<Key, Value>(cache: Cache<Key, Value>, eq: (left: Key, right: Key) => boolean, requestId: string, key: Key, result: Value, now: Date): Cache<Key, Value> {
   const items = cache.map(item => {
-    if (eq(item.input, input)) {
+    if (eq(item.key, key)) {
       return item.resultArrived(requestId, result, now)
     } else {
       return item
@@ -50,7 +50,7 @@ export function resultArrived<I, R>(cache: Cache<I, R>, eq: (left: I, right: I) 
   return items
 }
 
-export function truncate<I, R>(cache: Cache<I, R>, maxNumberOfCacheItems: number): Cache<I, R> {
+export function truncate<Key, Value>(cache: Cache<Key, Value>, maxNumberOfCacheItems: number): Cache<Key, Value> {
   const sortedCache = cache.sort((left, right) => {
     if (left.asyncResult.type === RESULT_ARRIVED && right.asyncResult.type === RESULT_ARRIVED) {
       return right.asyncResult.when.valueOf() - left.asyncResult.when.valueOf()
