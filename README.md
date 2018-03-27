@@ -55,20 +55,13 @@ To prevent making the same request multiple times we use a cache of pets. How th
 Instead of getting a list of pets _right now_, we have to wait for the server to respond with the pets. We can get:
 
 1. an object with property `type` equal to `'AWAITING_RESULT'`, which indicates that the request was made but no response was received yet,
-1. an object with property `type` equal to `'RESULT_ARRIVED'`, which indicates that the response was received,
+1. an object with property `type` equal to `'RESULT_ARRIVED'`, which indicates that the response was received (this object also contains the result under the property `result`),
 1. an object with property `type` equal to `'ERROR_OCURRED'`, which indicates that the request failed,
 1. an object with property `type` equal to `'ADVICE'` which indicates that no request was made yet.
 
-When we get an "arrived result" (the second case), we can get extract the pets:
+It's important to note that the library doesn't make any requests on its own! It will only advise you to do so (hence the type `'ADVICE'`). It's up to you to follow the advice (and make the request), or not.
 
-```javascript
-const asyncPetsThatMatchFilter = asyncPetsThatMatchFilterSelector(appState)
-const petsThatMatchFilter = asyncPetsThatMatchFilter.type === 'RESULT_ARRIVED'
-  ? asyncPetsThatMatchFilter.result
-  : []
-```
-
-When we get an "advice" (the fourth case), we can "follow it" by dispatching:
+You follow a request by dispatching:
 
 ```javascript
 const asyncPetsThatMatchFilter = asyncPetsThatMatchFilterSelector(appState)
@@ -77,11 +70,11 @@ if (asyncPetsThatMatchFilter.type === 'ADVICE') {
 }
 ```
 
-It's important to note that the library doesn't make requests on its own! It will only advise you to do so (when no request has been made already). It's up to you to either follow the advice, or do something else.
-
 ## Cache
 
-The cache stores responses, so we don't make the same request twice. By following advices, actions are dispatched that update the pets cache so that next time you apply the asynchronous selector, you will (hopefully) get an arrived result. Of course, we need first need to make the cache part of the store:
+The cache stores responses, so we don't make the same request multiple times. We have seen that by following advices, actions are dispatched that update the pets cache so that next time you apply the asynchronous selector, you will (hopefully) get an arrived result.
+
+Of course, we need first need to make the cache part of the store:
 
 ```javascript
 const reducer = combineReducers({
