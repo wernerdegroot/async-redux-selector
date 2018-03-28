@@ -7,7 +7,7 @@ import {
   ResultArrived
 } from './AsyncResult'
 import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
-import { getAsyncResultIfValid, Cache } from './Cache'
+import { getAsyncResultIfValid, CacheItems } from './Cache'
 
 export const ADVICE = 'ADVICE'
 
@@ -21,7 +21,7 @@ export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<Resourc
   readonly type: 'ADVICE' = ADVICE
 
   constructor(private readonly runner: (input: Input, getState: () => State) => Promise<Result>,
-              private readonly cacheSelector: (state: State) => Cache<Key, Result>,
+              private readonly cacheSelector: (state: State) => CacheItems<Key, Result>,
               private readonly inputToKey: (input: Input) => Key,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
               private readonly input: Input,

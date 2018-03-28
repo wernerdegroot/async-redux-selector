@@ -133,4 +133,4 @@ If we want, we can further specify:
 # TODO
 
 * Tests for `map` and `flatMap`
-
+* Make `CacheItem` a plain object instead of a class

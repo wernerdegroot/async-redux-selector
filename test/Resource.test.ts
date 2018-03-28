@@ -4,13 +4,13 @@ import { ADVICE } from '../AsyncResultOrAdvice'
 import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
 import { bigLifetime, Input, Result, someInput, someResourceId, someResult, State } from './data'
 import { defer } from './IDeferred'
-import { Cache } from '../Cache'
+import { CacheItems } from '../Cache'
 
 describe('Resource', () => {
 
   it('should produce an advice for requests that weren\'t made before', async () => {
 
-    const state: State = { cache: [] }
+    const state: State = { cacheItems: [] }
 
     const deferred = defer<Result>()
 
@@ -22,8 +22,8 @@ describe('Resource', () => {
       }
     }
 
-    function cacheSelector(state: State): Cache<string, Result> {
-      return state.cache
+    function cacheSelector(state: State): CacheItems<string, Result> {
+      return state.cacheItems
     }
 
     function inputToKey(input: Input): string {

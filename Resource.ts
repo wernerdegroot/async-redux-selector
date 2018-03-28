@@ -1,4 +1,4 @@
-import { awaitingResult, Cache, getAsyncResultIfValid, resultArrived, truncate } from './Cache'
+import { awaitingResult, CacheItems, getAsyncResultIfValid, resultArrived, truncate } from './Cache'
 import { v4 as uuid } from 'uuid'
 import { AsyncResultOrAdvice, DefaultAdvice, IAdvice } from './AsyncResultOrAdvice'
 import { CacheItem } from './CacheItem' // Required to prevent compile error.
@@ -12,7 +12,7 @@ export interface ICreateResourceParam<Input, Key, Result, Action extends { type:
   resourceId: string
   runner: (input: Input, getState: () => State) => Promise<Result>
   inputToKey: (input: Input) => Key
-  cacheSelector: (state: State) => Cache<Key, Result>
+  cacheSelector: (state: State) => CacheItems<Key, Result>
   keysAreEqual?: (left: Key, right: Key) => boolean
   validityInMiliseconds?: number
   maxNumberOfCacheItems?: number
@@ -38,7 +38,7 @@ export function createResource<Input, Key, Result, Action extends { type: string
 export interface ICreateResourceShortParam<Input, Result, Action extends { type: string }, State> {
   resourceId: string
   runner: (input: Input, getState: () => State) => Promise<Result>
-  cacheSelector: (state: State) => Cache<Input, Result>
+  cacheSelector: (state: State) => CacheItems<Input, Result>
   inputsAreEqual?: (left: Input, right: Input) => boolean
   validityInMiliseconds?: number
   maxNumberOfCacheItems?: number
@@ -66,14 +66,14 @@ export class Resource<Input, Key, Result, Action extends { type: string }, State
   constructor(public readonly resourceId: string,
               private readonly runner: (input: Input, getState: () => State) => Promise<Result>,
               private readonly inputToKey: (input: Input) => Key,
-              private readonly cacheSelector: (state: State) => Cache<Key, Result>,
+              private readonly cacheSelector: (state: State) => CacheItems<Key, Result>,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
               private readonly validityInMiliseconds: number,
               private readonly maxNumberOfCacheItems: number) {
 
   }
 
-  public selector = (cache: Cache<Key, Result>, input: Input): AsyncResultOrAdvice<Result, ResourceAction<Key, Result>, State> => {
+  public selector = (cache: CacheItems<Key, Result>, input: Input): AsyncResultOrAdvice<Result, ResourceAction<Key, Result>, State> => {
     const now = new Date()
     const possibleAsyncResult = getAsyncResultIfValid(cache, this.keysAreEqual, this.inputToKey(input), now)
     if (possibleAsyncResult === undefined) {
@@ -83,7 +83,7 @@ export class Resource<Input, Key, Result, Action extends { type: string }, State
     }
   }
 
-  public reducer = (cache: Cache<Key, Result> = [], action: GenericAction): Cache<Key, Result> => {
+  public reducer = (cache: CacheItems<Key, Result> = [], action: GenericAction): CacheItems<Key, Result> => {
     if (isAwaitingResultAction<Key>(action)) {
       return action.resourceId === this.resourceId
         ? awaitingResult(cache, this.keysAreEqual, this.validityInMiliseconds, action.requestId, action.key)
