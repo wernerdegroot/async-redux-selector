@@ -20,22 +20,20 @@ export interface IAdvice<Action, State> {
 export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<ResourceAction<Key, Result>, State> {
   readonly type: 'ADVICE' = ADVICE
 
-  constructor(private readonly runner: (input: Input, getState: () => State) => Promise<Result>,
-              private readonly cacheSelector: (state: State) => CacheItems<Key, Result>,
-              private readonly inputToKey: (input: Input) => Key,
+  constructor(private readonly getPromise: (getState: () => State) => Promise<Result>,
+              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, Result>,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
-              private readonly input: Input,
-              private readonly resourceId: string,
+              private readonly key: Key,
+              private readonly cacheId: string,
               private readonly requestId: string) {
   }
 
   followAdvice = (dispatch: (action: ResourceAction<Key, Result>) => void, getState: () => State): Promise<void> => {
-    const key = this.inputToKey(this.input)
-    const cache = this.cacheSelector(getState())
-    if (getAsyncResultIfValid(cache, this.keysAreEqual, key, new Date()) === undefined) {
-      dispatch(awaitingResultAction(this.resourceId, this.requestId, key, new Date()))
-      return this.runner(this.input, getState).then(result => {
-        dispatch(resultArrivedAction(this.resourceId, this.requestId, key, result, new Date()))
+    const cache = this.cacheItemsSelector(getState())
+    if (getAsyncResultIfValid(cache, this.keysAreEqual, this.key, new Date()) === undefined) {
+      dispatch(awaitingResultAction(this.cacheId, this.requestId, this.key, new Date()))
+      return this.getPromise(getState).then(result => {
+        dispatch(resultArrivedAction(this.cacheId, this.requestId, this.key, result, new Date()))
       })
     } else {
       return Promise.resolve()

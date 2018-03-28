@@ -49,7 +49,7 @@ export type State = {
 export const someRequestId = 'some-request-id'
 export const someOtherRequestId = 'some-other-request-id'
 
-export const someResourceId = 'some-resource-id'
+export const someCacheId = 'some-resource-id'
 
 export const now = new Date(2018, 3, 8, 2, 4, 1)
 export const smallLifetime = 2 * 60 * 1000

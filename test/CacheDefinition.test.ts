@@ -1,12 +1,12 @@
-import { Resource } from '../Resource'
+import { CacheDefinition } from '../CacheDefinition'
 import { GenericAction } from '../Action'
 import { ADVICE } from '../AsyncResultOrAdvice'
 import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
-import { bigLifetime, Input, Result, someInput, someResourceId, someResult, State } from './data'
+import { bigLifetime, Input, Result, someInput, someCacheId, someResult, State } from './data'
 import { defer } from './IDeferred'
 import { CacheItems } from '../CacheItems'
 
-describe('Resource', () => {
+describe('CacheDefinition', () => {
 
   it('should produce an advice for requests that weren\'t made before', async () => {
 
@@ -14,15 +14,7 @@ describe('Resource', () => {
 
     const deferred = defer<Result>()
 
-    function runner(input: Input): Promise<Result> {
-      if (input === someInput) {
-        return deferred.promise
-      } else {
-        throw new Error('Should not happen!')
-      }
-    }
-
-    function cacheSelector(state: State): CacheItems<string, Result> {
+    function cacheItemsSelector(state: State): CacheItems<string, Result> {
       return state.cacheItems
     }
 
@@ -30,17 +22,16 @@ describe('Resource', () => {
       return input.key
     }
 
-    const resource = new Resource<Input, string, Result, GenericAction, State>(
-      someResourceId,
-      runner,
+    const cacheDefinition = new CacheDefinition<Input, string, Result, State>(
+      someCacheId,
+      cacheItemsSelector,
       inputToKey,
-      cacheSelector,
       (left: string, right: string) => left === right,
       bigLifetime,
       2
     )
 
-    const asyncResultOrAdvice = resource.selector([], someInput)
+    const asyncResultOrAdvice = cacheDefinition.selector(state).getFor(someInput).orElse(() => deferred.promise)
 
     const actions: GenericAction[] = []
     function dispatch(action: GenericAction): void {
