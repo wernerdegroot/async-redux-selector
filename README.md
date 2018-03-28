@@ -118,11 +118,17 @@ const PetsCache = Cache({
 })
 ```
 
-We need three things:
+We basically need three things:
 
 1. a unique `cacheId` to identify the pets cache among all the other possible caches in the store,
-1. a way to check if two filters are the same (to prevent making the same request multiple times),
-1. the location of the cache in the store.
+2. a way to check if two filters are the same (to prevent making the same request multiple times),
+3. the location of the cache in the store.
+
+If we want, we can further specify:
+
+4. The maximum number of responses cached,
+5. The time that a response remains valid,
+6. The key under which a response is stored in the cache (to make searching the cache faster).
 
 # TODO
 
