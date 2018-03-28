@@ -1,5 +1,5 @@
 import { addMilliseconds } from 'date-fns'
-import { CacheItems } from '../Cache'
+import { CacheItems } from '../CacheItems'
 
 export type Input = {
   key: string

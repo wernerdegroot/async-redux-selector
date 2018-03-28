@@ -1,4 +1,4 @@
-import { awaitingResult, CacheItems, clear, getAsyncResultIfValid, resultArrived, truncate } from '../Cache'
+import { awaitingResult, CacheItems, clear, getAsyncResultIfValid, resultArrived, truncate } from '../CacheItems'
 import { AwaitingFirstResult, AwaitingNextResult, ResultArrived } from '../AsyncResult'
 import {
   bigLifetime,

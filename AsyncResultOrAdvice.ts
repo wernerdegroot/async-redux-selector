@@ -7,7 +7,7 @@ import {
   ResultArrived
 } from './AsyncResult'
 import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
-import { getAsyncResultIfValid, CacheItems } from './Cache'
+import { getAsyncResultIfValid, CacheItems } from './CacheItems'
 
 export const ADVICE = 'ADVICE'
 

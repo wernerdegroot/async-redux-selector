@@ -1,4 +1,4 @@
-import { awaitingResult, CacheItems, getAsyncResultIfValid, resultArrived, truncate } from './Cache'
+import { awaitingResult, CacheItems, getAsyncResultIfValid, resultArrived, truncate } from './CacheItems'
 import { v4 as uuid } from 'uuid'
 import { AsyncResultOrAdvice, DefaultAdvice, IAdvice } from './AsyncResultOrAdvice'
 import { CacheItem } from './CacheItem' // Required to prevent compile error.

@@ -4,7 +4,7 @@ import { ADVICE } from '../AsyncResultOrAdvice'
 import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
 import { bigLifetime, Input, Result, someInput, someResourceId, someResult, State } from './data'
 import { defer } from './IDeferred'
-import { CacheItems } from '../Cache'
+import { CacheItems } from '../CacheItems'
 
 describe('Resource', () => {
 
