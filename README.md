@@ -136,3 +136,4 @@ If we want, we can further specify:
 * Make `CacheItem` a plain object instead of a class
 * Flatten `CacheDefinition.selector`
 * Unify `AWAITING_FIRST_RESULT` and `AWAITING_NEXT_RESULT`
+* Rename `cacheSelector` to `cacheItemsSelector` (on the input side).
