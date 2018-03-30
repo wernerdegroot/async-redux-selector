@@ -134,3 +134,5 @@ If we want, we can further specify:
 
 * Tests for `map` and `flatMap`
 * Make `CacheItem` a plain object instead of a class
+* Flatten `CacheDefinition.selector`
+* Unify `AWAITING_FIRST_RESULT` and `AWAITING_NEXT_RESULT`
