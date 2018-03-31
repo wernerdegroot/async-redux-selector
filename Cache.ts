@@ -1,9 +1,10 @@
+import { v4 as uuid } from 'uuid'
+
 import { ResourceAction } from './Action'
+import { AsyncResult } from './AsyncResult'
+import { AsyncResultCacheItems } from './AsyncResultCacheItems'
 import { AsyncResultOrAdvice, DefaultAdvice } from './AsyncResultOrAdvice'
 import { CacheItems } from './CacheItems'
-import { v4 as uuid } from 'uuid'
-import { AsyncResult } from './AsyncResult'
-import { AsyncResultCacheItems } from './AsyncResultCacheItems';
 
 export class CacheIntermediateResult<Input, Key, Result, State> {
 
