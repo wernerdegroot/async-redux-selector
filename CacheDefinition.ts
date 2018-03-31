@@ -20,7 +20,7 @@ export class CacheDefinition<Input, Key, Result, State> {
       this.cacheItemsSelector(state)
     )
 
-  public reducer = (cacheItems: CacheItems<Key, AsyncResult<Result>> = [], action: GenericAction): CacheItems<Key, AsyncResult<Result>> => {
+  public itemsReducer = (cacheItems: CacheItems<Key, AsyncResult<Result>> = [], action: GenericAction): CacheItems<Key, AsyncResult<Result>> => {
     if (isAwaitingResultAction<Key>(action) && action.resourceId === this.cacheId) {
       return AsyncResultCacheItems.awaitingResult(cacheItems, this.keysAreEqual, this.validityInMiliseconds, action.requestId, action.key, action.currentTime)
     } else if (isResultArrivedAction<Key, Result>(action) && action.resourceId === this.cacheId) {

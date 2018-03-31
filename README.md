@@ -97,7 +97,7 @@ So far, we have neglected to specify a couple of things:
     ```javascript
     const reducer = combineReducers({
       ...
-      petsCache: PetsCache.reducer,
+      petsCacheItems: PetsCache.itemsReducer,
       ...
     })
     ```
@@ -114,7 +114,7 @@ Both cases require a _cache definition_ with the name `PetsCache`, which is give
 const PetsCache = Cache({
   cacheId: 'pets',
   inputsAreEqual: (filter1, filter2) => filter1.petType === filter2.petType,
-  cacheSelector: appState => appState.petsCache
+  cacheItemsSelector: appState => appState.petsCacheItems
 })
 ```
 
