@@ -1,7 +1,4 @@
 import { addMilliseconds } from 'date-fns'
-import { AsyncResult } from './AsyncResult'
-import { RESULT_ARRIVED } from './Action'
-import { Cache } from './Cache';
 
 export type CacheItem<Key, Value> = Readonly<{
   key: Key,

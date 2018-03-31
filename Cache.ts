@@ -1,8 +1,9 @@
 import { ResourceAction } from './Action'
 import { AsyncResultOrAdvice, DefaultAdvice } from './AsyncResultOrAdvice'
-import { CacheItems, getAsyncResultIfValid } from './CacheItems'
+import { CacheItems } from './CacheItems'
 import { v4 as uuid } from 'uuid'
 import { AsyncResult } from './AsyncResult'
+import { AsyncResultCacheItems } from './AsyncResultCacheItems';
 
 export class CacheIntermediateResult<Input, Key, Result, State> {
 
@@ -18,7 +19,7 @@ export class CacheIntermediateResult<Input, Key, Result, State> {
   public orElse(getPromise: (getState: () => State) => Promise<Result>): AsyncResultOrAdvice<Result, ResourceAction<Key, Result>, State> {
     const now = new Date()
     const requestId = uuid()
-    const possibleAsyncResult = getAsyncResultIfValid(this.cacheItems, this.keysAreEqual, this.key, now)
+    const possibleAsyncResult = AsyncResultCacheItems.getAsyncResultIfValid(this.cacheItems, this.keysAreEqual, this.key, now)
     if (possibleAsyncResult === undefined) {
       return new DefaultAdvice(
         getPromise,

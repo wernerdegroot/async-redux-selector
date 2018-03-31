@@ -1,11 +1,11 @@
-import { CacheDefinition } from '../CacheDefinition'
 import { GenericAction } from '../Action'
-import { ADVICE } from '../AsyncResultOrAdvice'
-import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
-import { bigLifetime, Input, Result, someInput, someCacheId, someResult, State } from './data'
-import { defer } from './IDeferred'
-import { CacheItems } from '../CacheItems'
 import { AsyncResult } from '../AsyncResult'
+import { ADVICE } from '../AsyncResultOrAdvice'
+import { CacheDefinition } from '../CacheDefinition'
+import { CacheItems } from '../CacheItems'
+import { bigLifetime, Input, Result, someCacheId, someInput, someResult, State } from './data'
+import { defer } from './IDeferred'
+import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './matchers'
 
 describe('CacheDefinition', () => {
 

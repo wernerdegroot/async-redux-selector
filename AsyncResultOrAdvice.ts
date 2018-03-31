@@ -1,13 +1,14 @@
+import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
 import {
   AsyncResult,
   AWAITING_FIRST_RESULT,
   AWAITING_NEXT_RESULT,
   AwaitingNextResult,
   RESULT_ARRIVED,
-  ResultArrived
+  ResultArrived,
 } from './AsyncResult'
-import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
-import { getAsyncResultIfValid, CacheItems } from './CacheItems'
+import { AsyncResultCacheItems } from './AsyncResultCacheItems'
+import { CacheItems } from './CacheItems'
 
 export const ADVICE = 'ADVICE'
 
@@ -30,7 +31,7 @@ export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<Resourc
 
   followAdvice = (dispatch: (action: ResourceAction<Key, Result>) => void, getState: () => State): Promise<void> => {
     const cacheItems = this.cacheItemsSelector(getState())
-    if (getAsyncResultIfValid(cacheItems, this.keysAreEqual, this.key, new Date()) === undefined) {
+    if (AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, this.keysAreEqual, this.key, new Date()) === undefined) {
       dispatch(awaitingResultAction(this.cacheId, this.requestId, this.key, new Date()))
       return this.getPromise(getState).then(result => {
         dispatch(resultArrivedAction(this.cacheId, this.requestId, this.key, result, new Date()))
@@ -85,7 +86,7 @@ export const AsyncResultOrAdvice = {
     } else if (aroa.type === AWAITING_NEXT_RESULT) {
       return new AwaitingNextResult(aroa.requestId, fn(aroa.previousResult))
     } else if (aroa.type === RESULT_ARRIVED) {
-      return new ResultArrived(fn(aroa.result))
+      return new ResultArrived(aroa.requestId, fn(aroa.result))
     } else {
       const exhaustive: never = aroa
       throw aroa

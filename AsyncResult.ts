@@ -22,7 +22,7 @@ export class ResultArrived<R> {
 
   public readonly type: 'RESULT_ARRIVED' = RESULT_ARRIVED
 
-  constructor(public readonly result: R) {
+  constructor(public readonly requestId: string, public readonly result: R) {
   }
 }
 
@@ -32,12 +32,16 @@ export const AsyncResult = {
   resultArrived<Result>(asyncResult: AsyncResult<Result>, id: string, result: Result): AsyncResult<Result> {
     if (asyncResult.type === AWAITING_FIRST_RESULT || asyncResult.type === AWAITING_NEXT_RESULT) {
       if (asyncResult.requestId === id) {
-        return new ResultArrived(result)
+        return new ResultArrived(asyncResult.requestId, result)
       } else {
         return asyncResult
       }
     } else if (asyncResult.type === RESULT_ARRIVED) {
-      throw new Error('Result has already arrived!')
+      if (asyncResult.requestId === id) {
+        throw new Error('Result has already arrived!')
+      } else {
+        return asyncResult
+      }
     } else {
       const exhaustive: never = asyncResult
       throw asyncResult

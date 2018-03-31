@@ -1,5 +1,5 @@
 import { GenericAction, isAwaitingResultAction, isResultArrivedAction } from '../Action'
-import { Input, Result, resultEq } from './data'
+import { Result, resultEq } from './data'
 
 export type IMatcher<A> = (a: A) => true | string
 

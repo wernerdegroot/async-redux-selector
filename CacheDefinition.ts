@@ -1,8 +1,8 @@
-import { awaitingResult, CacheItems, resultArrived, truncate } from './CacheItems'
-import { CacheItem } from './CacheItem' // Required to prevent compile error.
 import { GenericAction, isAwaitingResultAction, isResultArrivedAction } from './Action'
-import { Cache } from './Cache'
 import { AsyncResult } from './AsyncResult'
+import { AsyncResultCacheItems } from './AsyncResultCacheItems'
+import { Cache } from './Cache'
+import { CacheItems, truncate } from './CacheItems'
 
 export class CacheDefinition<Input, Key, Result, State> {
 
@@ -27,11 +27,11 @@ export class CacheDefinition<Input, Key, Result, State> {
   public reducer = (cacheItems: CacheItems<Key, AsyncResult<Result>> = [], action: GenericAction): CacheItems<Key, AsyncResult<Result>> => {
     if (isAwaitingResultAction<Key>(action)) {
       return action.resourceId === this.cacheId
-        ? awaitingResult(cacheItems, this.keysAreEqual, this.validityInMiliseconds, action.requestId, action.key, action.currentTime)
+        ? AsyncResultCacheItems.awaitingResult(cacheItems, this.keysAreEqual, this.validityInMiliseconds, action.requestId, action.key, action.currentTime)
         : cacheItems
     } else if (isResultArrivedAction<Key, Result>(action)) {
       if (action.resourceId === this.cacheId) {
-        return truncate(resultArrived(cacheItems, this.keysAreEqual, action.requestId, action.key, action.result, action.currentTime), this.maxNumberOfCacheItems)
+        return truncate(AsyncResultCacheItems.resultArrived(cacheItems, this.keysAreEqual, action.requestId, action.key, action.result, action.currentTime), this.maxNumberOfCacheItems)
       } else {
         return cacheItems
       }

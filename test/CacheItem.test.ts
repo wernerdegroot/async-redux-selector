@@ -1,10 +1,5 @@
-import { addMilliseconds } from 'date-fns'
 import { CacheItem } from '../CacheItem'
-import { AwaitingFirstResult, ResultArrived, AsyncResult } from '../AsyncResult'
-import {
-  bigLifetime, inputToKey, later, now, smallLifetime, someInput, someKey, someOtherRequestId, someRequestId,
-  someResult, Result, Key, muchLater
-} from './data'
+import { bigLifetime, later, muchLater, now, smallLifetime } from './data'
 
 describe('CacheItem', () => {
 

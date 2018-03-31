@@ -1,6 +1,6 @@
-import { CacheItems } from './CacheItems'
-import { CacheDefinition } from './CacheDefinition'
 import { AsyncResult } from './AsyncResult'
+import { CacheDefinition } from './CacheDefinition'
+import { CacheItems } from './CacheItems'
 
 const DEFAULT_VALIDITY_IN_MILISECONDS = 60 * 60 * 1000
 const DEFAULT_MAX_NUMBER_OF_CACHE_ITEMS = 5
