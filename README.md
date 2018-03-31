@@ -132,5 +132,6 @@ If we want, we can further specify:
 
 # TODO
 
+* Add error state.
 * Tests for `map` and `flatMap`
 * Tests for the reducer.
