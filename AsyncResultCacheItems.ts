@@ -1,9 +1,7 @@
 import {
   AsyncResult,
-  AWAITING_FIRST_RESULT,
-  AWAITING_NEXT_RESULT,
-  AwaitingFirstResult,
-  AwaitingNextResult,
+  AWAITING_RESULT,
+  AwaitingResult,
   RESULT_ARRIVED,
   ResultArrived
 } from './AsyncResult'
@@ -37,10 +35,8 @@ export const AsyncResultCacheItems = {
       asyncResult = AsyncResult.awaitingFirstResult(requestId)
     } else if (previousCacheItem.value.type === RESULT_ARRIVED) {
       asyncResult = AsyncResult.awaitingNextResult(requestId, previousCacheItem.value.result)
-    } else if (previousCacheItem.value.type === AWAITING_NEXT_RESULT) {
+    } else if (previousCacheItem.value.type === AWAITING_RESULT) {
       asyncResult = AsyncResult.awaitingNextResult(requestId, previousCacheItem.value.previousResult)
-    } else if (previousCacheItem.value.type === AWAITING_FIRST_RESULT) {
-      asyncResult = AsyncResult.awaitingFirstResult(requestId)
     } else {
       const exhaustive: never = previousCacheItem.value
       throw exhaustive

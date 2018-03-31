@@ -1,16 +1,10 @@
-export const AWAITING_FIRST_RESULT = 'AWAITING_FIRST_RESULT'
-export const AWAITING_NEXT_RESULT = 'AWAITING_NEXT_RESULT'
+export const AWAITING_RESULT = 'AWAITING_RESULT'
 export const RESULT_ARRIVED = 'RESULT_ARRIVED'
 
-export type AwaitingFirstResult = Readonly<{
-  type: 'AWAITING_FIRST_RESULT',
-  requestId: string
-}>
-
-export type AwaitingNextResult<R> = Readonly<{
-  type: 'AWAITING_NEXT_RESULT',
+export type AwaitingResult<R> = Readonly<{
+  type: 'AWAITING_RESULT',
   requestId: string,
-  previousResult: R
+  previousResult?: R
 }>
 
 export type ResultArrived<R> = Readonly<{
@@ -19,20 +13,20 @@ export type ResultArrived<R> = Readonly<{
   result: R
 }>
 
-export type AsyncResult<Result> = AwaitingFirstResult | AwaitingNextResult<Result> | ResultArrived<Result>
+export type AsyncResult<Result> = AwaitingResult<Result> | ResultArrived<Result>
 
 export const AsyncResult = {
 
-  awaitingFirstResult(requestId: string): AwaitingFirstResult {
+  awaitingFirstResult<R>(requestId: string): AwaitingResult<R> {
     return {
-      type: AWAITING_FIRST_RESULT,
+      type: AWAITING_RESULT,
       requestId
     }
   },
 
-  awaitingNextResult<R>(requestId: string, previousResult: R): AwaitingNextResult<R> {
+  awaitingNextResult<R>(requestId: string, previousResult: R): AwaitingResult<R> {
     return {
-      type: AWAITING_NEXT_RESULT,
+      type: AWAITING_RESULT,
       requestId,
       previousResult
     }
@@ -47,7 +41,7 @@ export const AsyncResult = {
   },
 
   withResultArrived<Result>(asyncResult: AsyncResult<Result>, id: string, result: Result): AsyncResult<Result> {
-    if (asyncResult.type === AWAITING_FIRST_RESULT || asyncResult.type === AWAITING_NEXT_RESULT) {
+    if (asyncResult.type === AWAITING_RESULT) {
       if (asyncResult.requestId === id) {
         return AsyncResult.resultArrived(asyncResult.requestId, result)
       } else {

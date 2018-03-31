@@ -135,5 +135,5 @@ If we want, we can further specify:
 * Tests for `map` and `flatMap`
 * Store `lastUpdated` as number instead of `Date`.
 * Flatten `CacheDefinition.selector`
-* Unify `AWAITING_FIRST_RESULT` and `AWAITING_NEXT_RESULT`
 * Rename `cacheSelector` to `cacheItemsSelector` (on the input side).
+* Add actions for clearing the cache, and removing one item.

@@ -1,4 +1,4 @@
-import { AwaitingFirstResult, AwaitingNextResult, ResultArrived, AsyncResult } from '../AsyncResult'
+import { AwaitingResult, ResultArrived, AsyncResult } from '../AsyncResult'
 import { AsyncResultCacheItems } from '../AsyncResultCacheItems'
 import {
   bigLifetime,

@@ -1,8 +1,8 @@
-import { AsyncResult, AwaitingFirstResult, AwaitingNextResult, ResultArrived } from '../AsyncResult'
+import { AsyncResult, AwaitingResult, ResultArrived } from '../AsyncResult'
 import { Result, someOtherRequestId, someOtherResult, someRequestId, someResult } from './data'
 
 describe('AsyncResult', () => {
-  it('should only transition from AWAITING_FIRST_RESULT to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
+  it('should only transition from AWAITING_RESULT without a previous result to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
     const awaitingFirstResult = AsyncResult.awaitingFirstResult(someRequestId)
     const transitionForSameId = AsyncResult.withResultArrived(awaitingFirstResult, someRequestId, someResult)
     const transitionForOtherId = AsyncResult.withResultArrived(awaitingFirstResult, someOtherRequestId, someResult)
@@ -11,7 +11,7 @@ describe('AsyncResult', () => {
     expect(transitionForOtherId).toEqual(awaitingFirstResult)
   })
 
-  it('should only transition from AWAITING_NEXT_RESULT to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
+  it('should only transition from AWAITING_RESULT with a previous result to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
     const awaitingNextResult = AsyncResult.awaitingNextResult<Result>(someRequestId, someResult)
     const transitionForSameId = AsyncResult.withResultArrived(awaitingNextResult, someRequestId, someOtherResult)
     const transitionForOtherId = AsyncResult.withResultArrived(awaitingNextResult, someOtherRequestId, someOtherResult)

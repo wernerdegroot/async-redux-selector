@@ -1,9 +1,8 @@
 import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
 import {
   AsyncResult,
-  AWAITING_FIRST_RESULT,
-  AWAITING_NEXT_RESULT,
-  AwaitingNextResult,
+  AWAITING_RESULT,
+  AwaitingResult,
   RESULT_ARRIVED,
   ResultArrived,
 } from './AsyncResult'
@@ -69,7 +68,7 @@ export const AsyncResultOrAdvice = {
   },
 
   getOrElse<A, Action, State>(aroa: AsyncResultOrAdvice<A, Action, State>, alternative: A): A {
-    if (aroa.type === AWAITING_NEXT_RESULT) {
+    if (aroa.type === AWAITING_RESULT && aroa.previousResult !== undefined) {
       return aroa.previousResult
     } else if (aroa.type === RESULT_ARRIVED) {
       return aroa.result
@@ -81,10 +80,12 @@ export const AsyncResultOrAdvice = {
   map<A, B, Action, State>(aroa: AsyncResultOrAdvice<A, Action, State>, fn: (a: A) => B): AsyncResultOrAdvice<B, Action, State> {
     if (aroa.type === ADVICE) {
       return aroa
-    } else if (aroa.type === AWAITING_FIRST_RESULT) {
-      return aroa
-    } else if (aroa.type === AWAITING_NEXT_RESULT) {
-      return AsyncResult.awaitingNextResult(aroa.requestId, fn(aroa.previousResult))
+    } else if (aroa.type === AWAITING_RESULT) {
+      if (aroa.previousResult === undefined) {
+        return AsyncResult.awaitingFirstResult(aroa.requestId)
+      } else {
+        return AsyncResult.awaitingNextResult(aroa.requestId, fn(aroa.previousResult)) 
+      }
     } else if (aroa.type === RESULT_ARRIVED) {
       return AsyncResult.resultArrived(aroa.requestId, fn(aroa.result))
     } else {
@@ -96,10 +97,12 @@ export const AsyncResultOrAdvice = {
   flatMap<A, B, Action, State>(aroa: AsyncResultOrAdvice<A, Action, State>, fn: (a: A) => AsyncResultOrAdvice<B, Action, State>): AsyncResultOrAdvice<B, Action, State> {
     if (aroa.type === ADVICE) {
       return aroa
-    } else if (aroa.type === AWAITING_FIRST_RESULT) {
-      return aroa
-    } else if (aroa.type === AWAITING_NEXT_RESULT) {
-      return fn(aroa.previousResult)
+    } else if (aroa.type === AWAITING_RESULT) {
+      if (aroa.previousResult === undefined) {
+        return AsyncResult.awaitingFirstResult(aroa.requestId)
+      } else {
+        return fn(aroa.previousResult)
+      }
     } else if (aroa.type === RESULT_ARRIVED) {
       return fn(aroa.result)
     } else {
