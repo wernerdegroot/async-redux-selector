@@ -134,6 +134,9 @@ If we want, we can further specify:
 
 * Tests for `map` and `flatMap`
 * Make `CacheItem` a plain object instead of a class
+* Store `lastUpdated` as number instead of `Date`.
+* Make `AsyncResult` a plain object
 * Flatten `CacheDefinition.selector`
 * Unify `AWAITING_FIRST_RESULT` and `AWAITING_NEXT_RESULT`
 * Rename `cacheSelector` to `cacheItemsSelector` (on the input side).
+* Clean up imports

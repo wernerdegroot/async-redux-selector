@@ -1,12 +1,13 @@
 import { CacheItems } from './CacheItems'
 import { CacheDefinition } from './CacheDefinition'
+import { AsyncResult } from './AsyncResult'
 
 const DEFAULT_VALIDITY_IN_MILISECONDS = 60 * 60 * 1000
 const DEFAULT_MAX_NUMBER_OF_CACHE_ITEMS = 5
 
 export interface ICacheDefinitionObj<Input, Key, Result, State> {
   cacheId: string
-  cacheSelector: (state: State) => CacheItems<Input, Result> // The name is not entirely correct (it should actually be `cacheItemsSelector`). For the sake of a simple interface, we keep this a little white lie.
+  cacheSelector: (state: State) => CacheItems<Input, AsyncResult<Result>> // The name is not entirely correct (it should actually be `cacheItemsSelector`). For the sake of a simple interface, we keep this a little white lie.
   inputToKey: (input: Input) => Key,
   keysAreEqual?: (left: Input, right: Input) => boolean
   validityInMiliseconds?: number
@@ -15,7 +16,7 @@ export interface ICacheDefinitionObj<Input, Key, Result, State> {
 
 export interface ICacheDefinitionWhenKeyIsInputObj<Input, Result, State> {
   cacheId: string
-  cacheSelector: (state: State) => CacheItems<Input, Result> // The name is not entirely correct (it should actually be `cacheItemsSelector`). For the sake of a simple interface, we keep this a little white lie.
+  cacheSelector: (state: State) => CacheItems<Input, AsyncResult<Result>> // The name is not entirely correct (it should actually be `cacheItemsSelector`). For the sake of a simple interface, we keep this a little white lie.
   inputsAreEqual?: (left: Input, right: Input) => boolean
   validityInMiliseconds?: number
   maxNumberOfCacheItems?: number

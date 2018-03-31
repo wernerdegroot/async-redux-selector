@@ -2,13 +2,14 @@ import { ResourceAction } from './Action'
 import { AsyncResultOrAdvice, DefaultAdvice } from './AsyncResultOrAdvice'
 import { CacheItems, getAsyncResultIfValid } from './CacheItems'
 import { v4 as uuid } from 'uuid'
+import { AsyncResult } from './AsyncResult'
 
 export class CacheIntermediateResult<Input, Key, Result, State> {
 
   constructor(private readonly cacheId: string,
-              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, Result>,
+              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
-              private readonly cacheItems: CacheItems<Key, Result>,
+              private readonly cacheItems: CacheItems<Key, AsyncResult<Result>>,
               private readonly input: Input,
               private readonly key: Key) {
 
@@ -36,10 +37,10 @@ export class CacheIntermediateResult<Input, Key, Result, State> {
 export class Cache<Input, Key, Result, State> {
 
   constructor(private readonly cacheId: string,
-              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, Result>,
+              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
               private readonly inputToKey: (input: Input) => Key,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
-              private readonly cacheItems: CacheItems<Key, Result>) {
+              private readonly cacheItems: CacheItems<Key, AsyncResult<Result>>) {
   }
 
   public getFor(input: Input): CacheIntermediateResult<Input, Key, Result, State> {

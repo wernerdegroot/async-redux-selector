@@ -1,53 +1,91 @@
 import { addMilliseconds } from 'date-fns'
 import { CacheItem } from '../CacheItem'
-import { AwaitingFirstResult, ResultArrived } from '../AsyncResult'
+import { AwaitingFirstResult, ResultArrived, AsyncResult } from '../AsyncResult'
 import {
   bigLifetime, inputToKey, later, now, smallLifetime, someInput, someKey, someOtherRequestId, someRequestId,
-  someResult
+  someResult, Result, Key, muchLater
 } from './data'
 
 describe('CacheItem', () => {
-  it('should not be valid after it was forced to be invalid', () => {
-    const asyncResultArrived = new ResultArrived(someResult, now)
-    const expectedValid = new CacheItem(someKey, asyncResultArrived, bigLifetime, false)
-    const expectedInvalid = expectedValid.forceInvalid()
 
-    expect(expectedValid.isValid(later)).toEqual(true)
-    expect(expectedInvalid.isValid(later)).toEqual(false)
+  it('should be valid when its lifetime is not over yet', () => {
+    const expectedValid: CacheItem<number, string> = { 
+      key: 0, 
+      value: 'zero', 
+      validityInMiliseconds: bigLifetime, 
+      forcedInvalid: false, 
+      updated: now
+    }
+
+    expect(CacheItem.isValid(expectedValid, later)).toEqual(true)
+  })
+
+  it('should not be valid after it was forced to be invalid', () => {
+    const cacheItem: CacheItem<number, string> = { 
+      key: 1, 
+      value: 'one', 
+      validityInMiliseconds: bigLifetime, 
+      forcedInvalid: false, 
+      updated: now
+    }
+    const expectedInvalid = CacheItem.forceInvalid(cacheItem)
+
+    expect(CacheItem.isValid(expectedInvalid, later)).toEqual(false)
   })
 
   it('should not be valid after its lifetime is over', () => {
-    const asyncResultArrived = new ResultArrived(someResult, now)
-    const expectedInvalid = new CacheItem(someKey, asyncResultArrived, smallLifetime, false)
-    expect(expectedInvalid.isValid(later)).toEqual(false)
+    const expectedInvalid: CacheItem<number, string> = {
+      key: 2,
+      value: 'two',
+      validityInMiliseconds: smallLifetime,
+      forcedInvalid: false,
+      updated: now
+    }
+    expect(CacheItem.isValid(expectedInvalid, later)).toEqual(false)
   })
 
-  it('should be valid when the result has not arrived yet', () => {
-    const asyncResultAwaiting = new AwaitingFirstResult(someRequestId)
-    const expectedValid = new CacheItem(someKey, asyncResultAwaiting, smallLifetime, false)
-    expect(expectedValid.isValid(later)).toEqual(true)
+  it('should be valid when the lifetime is over but it was updated before the lifetime was over', () => {
+    const cacheItem: CacheItem<number, string> = {
+      key: 3,
+      value: 'three',
+      validityInMiliseconds: bigLifetime,
+      forcedInvalid: false,
+      updated: now
+    }
+    const updatedCacheItem = CacheItem.update(
+      cacheItem,
+      value => value + '!',
+      later
+    )
+    expect(updatedCacheItem.value).toEqual('three!')
+    expect(CacheItem.isValid(updatedCacheItem, muchLater)).toEqual(true)
   })
 
-  it('should be valid when the result has not arrived yet, even if it was forced to be invalid', () => {
-    const asyncResultAwaiting = new AwaitingFirstResult(someRequestId)
-    const expectedValid = new CacheItem(someKey, asyncResultAwaiting, smallLifetime, true)
-    expect(expectedValid.isValid(later)).toEqual(true)
-  })
+  it('should order cache items by the time they ware last updated', () => {
+    const cacheItem1: CacheItem<number, string> = {
+      key: 1,
+      value: 'one',
+      validityInMiliseconds: bigLifetime,
+      forcedInvalid: false,
+      updated: now
+    }
+    
+    const cacheItem2: CacheItem<number, string> = {
+      key: 2,
+      value: 'two',
+      validityInMiliseconds: bigLifetime,
+      forcedInvalid: false,
+      updated: later 
+    }
 
-  it('should contain a result (and not be invalid) when a result arrived with the right requestId', () => {
-    const asyncResultAwaiting = new AwaitingFirstResult(someRequestId)
-    const cacheItem = new CacheItem(someKey, asyncResultAwaiting, smallLifetime, true)
-    const cacheItemWithResult = cacheItem.resultArrived(someRequestId, someResult, now)
+    const cacheItem3: CacheItem<number, string> = {
+      key: 3,
+      value: 'three',
+      validityInMiliseconds: bigLifetime,
+      forcedInvalid: false,
+      updated: muchLater 
+    }
 
-    expect(cacheItemWithResult.asyncResult).toEqual(new ResultArrived(someResult, now))
-    expect(cacheItemWithResult.isValid(now)).toEqual(true)
-  })
-
-  it('should not contain a result when a result arrived with the wrong requestId', () => {
-    const asyncResultAwaiting = new AwaitingFirstResult(someRequestId)
-    const cacheItem = new CacheItem(someKey, asyncResultAwaiting, smallLifetime, true)
-    const cacheItemWithResult = cacheItem.resultArrived(someOtherRequestId, someResult, now)
-
-    expect(cacheItemWithResult.asyncResult).toEqual(asyncResultAwaiting)
+    expect([cacheItem2, cacheItem1, cacheItem3].sort(CacheItem.order)).toEqual([cacheItem1, cacheItem2, cacheItem3])
   })
 })

@@ -21,7 +21,7 @@ export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<Resourc
   readonly type: 'ADVICE' = ADVICE
 
   constructor(private readonly getPromise: (getState: () => State) => Promise<Result>,
-              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, Result>,
+              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
               private readonly key: Key,
               private readonly cacheId: string,
@@ -29,8 +29,8 @@ export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<Resourc
   }
 
   followAdvice = (dispatch: (action: ResourceAction<Key, Result>) => void, getState: () => State): Promise<void> => {
-    const cache = this.cacheItemsSelector(getState())
-    if (getAsyncResultIfValid(cache, this.keysAreEqual, this.key, new Date()) === undefined) {
+    const cacheItems = this.cacheItemsSelector(getState())
+    if (getAsyncResultIfValid(cacheItems, this.keysAreEqual, this.key, new Date()) === undefined) {
       dispatch(awaitingResultAction(this.cacheId, this.requestId, this.key, new Date()))
       return this.getPromise(getState).then(result => {
         dispatch(resultArrivedAction(this.cacheId, this.requestId, this.key, result, new Date()))
@@ -85,7 +85,7 @@ export const AsyncResultOrAdvice = {
     } else if (aroa.type === AWAITING_NEXT_RESULT) {
       return new AwaitingNextResult(aroa.requestId, fn(aroa.previousResult))
     } else if (aroa.type === RESULT_ARRIVED) {
-      return new ResultArrived(fn(aroa.result), aroa.when)
+      return new ResultArrived(fn(aroa.result))
     } else {
       const exhaustive: never = aroa
       throw aroa

@@ -5,6 +5,7 @@ import { assert, matchAwaitingResult, matchesAll, matchResultArrived } from './m
 import { bigLifetime, Input, Result, someInput, someCacheId, someResult, State } from './data'
 import { defer } from './IDeferred'
 import { CacheItems } from '../CacheItems'
+import { AsyncResult } from '../AsyncResult'
 
 describe('CacheDefinition', () => {
 
@@ -14,7 +15,7 @@ describe('CacheDefinition', () => {
 
     const deferred = defer<Result>()
 
-    function cacheItemsSelector(state: State): CacheItems<string, Result> {
+    function cacheItemsSelector(state: State): CacheItems<string, AsyncResult<Result>> {
       return state.cacheItems
     }
 

@@ -1,46 +1,30 @@
 import { AsyncResult, AwaitingFirstResult, AwaitingNextResult, RESULT_ARRIVED, ResultArrived } from '../AsyncResult'
-
-type Result = {
-  value: string
-}
-
-const someResult: Result = {
-  value: 'some-result'
-}
-
-const someOtherResult: Result = {
-  value: 'some-other-result'
-}
-
-const someId = 'some-requestId'
-const someOtherId = 'some-other-requestId'
-
-const now = new Date(2018, 3, 8, 2, 4, 1)
+import { someRequestId, someOtherRequestId, someResult, Result, someOtherResult } from './data'
 
 describe('AsyncResult', () => {
   it('should only transition from AWAITING_FIRST_RESULT to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
-    const awaitingFirstResult = new AwaitingFirstResult(someId)
-    const transitionForSameId = AsyncResult.resultArrived(awaitingFirstResult, someId, someResult, now)
-    const transitionForOtherId = AsyncResult.resultArrived(awaitingFirstResult, someOtherId, someResult, now)
+    const awaitingFirstResult = new AwaitingFirstResult(someRequestId)
+    const transitionForSameId = AsyncResult.resultArrived(awaitingFirstResult, someRequestId, someResult)
+    const transitionForOtherId = AsyncResult.resultArrived(awaitingFirstResult, someOtherRequestId, someResult)
 
-    expect(transitionForSameId).toEqual(new ResultArrived(someResult, now))
+    expect(transitionForSameId).toEqual(new ResultArrived(someResult))
     expect(transitionForOtherId).toEqual(awaitingFirstResult)
   })
 
   it('should only transition from AWAITING_NEXT_RESULT to RESULT_ARRIVED when the requestId is the same (to prevent race conditions)', () => {
-    const awaitingNextResult = new AwaitingNextResult<Result>(someId, someResult)
-    const transitionForSameId = AsyncResult.resultArrived(awaitingNextResult, someId, someOtherResult, now)
-    const transitionForOtherId = AsyncResult.resultArrived(awaitingNextResult, someOtherId, someOtherResult, now)
+    const awaitingNextResult = new AwaitingNextResult<Result>(someRequestId, someResult)
+    const transitionForSameId = AsyncResult.resultArrived(awaitingNextResult, someRequestId, someOtherResult)
+    const transitionForOtherId = AsyncResult.resultArrived(awaitingNextResult, someOtherRequestId, someOtherResult)
 
-    expect(transitionForSameId).toEqual(new ResultArrived(someOtherResult, now))
+    expect(transitionForSameId).toEqual(new ResultArrived(someOtherResult))
     expect(transitionForOtherId).toEqual(awaitingNextResult)
   })
 
   it('should not be allowed to transition from RESULT_ARRIVED', () => {
-    const resultArrived = new ResultArrived(someResult, now)
+    const resultArrived = new ResultArrived(someResult)
 
     try {
-      const afterTransition = AsyncResult.resultArrived(resultArrived, someId, someOtherResult, now)
+      const afterTransition = AsyncResult.resultArrived(resultArrived, someRequestId, someOtherResult)
       fail()
     } catch (e) {
       expect(e.message).toEqual('Result has already arrived!')

@@ -2,11 +2,12 @@ import { awaitingResult, CacheItems, resultArrived, truncate } from './CacheItem
 import { CacheItem } from './CacheItem' // Required to prevent compile error.
 import { GenericAction, isAwaitingResultAction, isResultArrivedAction } from './Action'
 import { Cache } from './Cache'
+import { AsyncResult } from './AsyncResult'
 
 export class CacheDefinition<Input, Key, Result, State> {
 
   constructor(public readonly cacheId: string,
-              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, Result>,
+              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
               private readonly inputToKey: (input: Input) => Key,
               private readonly keysAreEqual: (left: Key, right: Key) => boolean,
               private readonly validityInMiliseconds: number,
@@ -23,10 +24,10 @@ export class CacheDefinition<Input, Key, Result, State> {
       this.cacheItemsSelector(state)
     )
 
-  public reducer = (cacheItems: CacheItems<Key, Result> = [], action: GenericAction): CacheItems<Key, Result> => {
+  public reducer = (cacheItems: CacheItems<Key, AsyncResult<Result>> = [], action: GenericAction): CacheItems<Key, AsyncResult<Result>> => {
     if (isAwaitingResultAction<Key>(action)) {
       return action.resourceId === this.cacheId
-        ? awaitingResult(cacheItems, this.keysAreEqual, this.validityInMiliseconds, action.requestId, action.key)
+        ? awaitingResult(cacheItems, this.keysAreEqual, this.validityInMiliseconds, action.requestId, action.key, action.currentTime)
         : cacheItems
     } else if (isResultArrivedAction<Key, Result>(action)) {
       if (action.resourceId === this.cacheId) {

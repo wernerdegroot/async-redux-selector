@@ -1,5 +1,6 @@
 import { addMilliseconds } from 'date-fns'
 import { CacheItems } from '../CacheItems'
+import { AsyncResult } from '../AsyncResult'
 
 export type Input = {
   key: string
@@ -43,7 +44,7 @@ export const someOtherResult: Result = {
 }
 
 export type State = {
-  cacheItems: CacheItems<string, Result>
+  cacheItems: CacheItems<string, AsyncResult<Result>>
 }
 
 export const someRequestId = 'some-request-id'
@@ -54,4 +55,7 @@ export const someCacheId = 'some-resource-id'
 export const now = new Date(2018, 3, 8, 2, 4, 1)
 export const smallLifetime = 2 * 60 * 1000
 export const bigLifetime = 6 * 60 * 1000
-export const later = addMilliseconds(now, (smallLifetime + bigLifetime) / 2)
+
+const timeStepInMiliseconds = (smallLifetime + bigLifetime) / 2
+export const later = addMilliseconds(now, timeStepInMiliseconds)
+export const muchLater = addMilliseconds(later, timeStepInMiliseconds)

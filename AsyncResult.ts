@@ -22,17 +22,17 @@ export class ResultArrived<R> {
 
   public readonly type: 'RESULT_ARRIVED' = RESULT_ARRIVED
 
-  constructor(public readonly result: R, public readonly when: Date) {
+  constructor(public readonly result: R) {
   }
 }
 
 export type AsyncResult<Result> = AwaitingFirstResult | AwaitingNextResult<Result> | ResultArrived<Result>
 
 export const AsyncResult = {
-  resultArrived<Result>(asyncResult: AsyncResult<Result>, id: string, result: Result, now: Date): AsyncResult<Result> {
+  resultArrived<Result>(asyncResult: AsyncResult<Result>, id: string, result: Result): AsyncResult<Result> {
     if (asyncResult.type === AWAITING_FIRST_RESULT || asyncResult.type === AWAITING_NEXT_RESULT) {
       if (asyncResult.requestId === id) {
-        return new ResultArrived(result, now)
+        return new ResultArrived(result)
       } else {
         return asyncResult
       }
