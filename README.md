@@ -134,5 +134,3 @@ If we want, we can further specify:
 
 * Tests for `map` and `flatMap`
 * Tests for the reducer.
-* Flatten `CacheDefinition.selector`
-* Rename `cacheSelector` to `cacheItemsSelector` (on the input side).

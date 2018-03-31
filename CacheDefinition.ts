@@ -7,20 +7,16 @@ import { CacheItems } from './CacheItems'
 export class CacheDefinition<Input, Key, Result, State> {
 
   constructor(public readonly cacheId: string,
-    private readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
-    private readonly inputToKey: (input: Input) => Key,
-    private readonly keysAreEqual: (left: Key, right: Key) => boolean,
-    private readonly validityInMiliseconds: number,
-    private readonly maxNumberOfCacheItems: number) {
-
+    public readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
+    public readonly inputToKey: (input: Input) => Key,
+    public readonly keysAreEqual: (left: Key, right: Key) => boolean,
+    public readonly validityInMiliseconds: number,
+    public readonly maxNumberOfCacheItems: number) {
   }
 
   public selector = (state: State): Cache<Input, Key, Result, State> =>
     new Cache(
-      this.cacheId,
-      this.cacheItemsSelector,
-      this.inputToKey,
-      this.keysAreEqual,
+      this,
       this.cacheItemsSelector(state)
     )
 

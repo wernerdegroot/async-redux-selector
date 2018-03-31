@@ -8,6 +8,7 @@ import {
 } from './AsyncResult'
 import { AsyncResultCacheItems } from './AsyncResultCacheItems'
 import { CacheItems } from './CacheItems'
+import { CacheDefinition } from './CacheDefinition';
 
 export const ADVICE = 'ADVICE'
 
@@ -21,19 +22,17 @@ export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<Resourc
   readonly type: 'ADVICE' = ADVICE
 
   constructor(private readonly getPromise: (getState: () => State) => Promise<Result>,
-              private readonly cacheItemsSelector: (state: State) => CacheItems<Key, AsyncResult<Result>>,
-              private readonly keysAreEqual: (left: Key, right: Key) => boolean,
+              private readonly cacheDefinition: CacheDefinition<Input, Key, Result, State>,
               private readonly key: Key,
-              private readonly cacheId: string,
               private readonly requestId: string) {
   }
 
   followAdvice = (dispatch: (action: ResourceAction<Key, Result>) => void, getState: () => State): Promise<void> => {
-    const cacheItems = this.cacheItemsSelector(getState())
-    if (CacheItems.getValueIfValid(cacheItems, this.keysAreEqual, this.key, new Date()) === undefined) {
-      dispatch(awaitingResultAction(this.cacheId, this.requestId, this.key, new Date()))
+    const cacheItems = this.cacheDefinition.cacheItemsSelector(getState())
+    if (CacheItems.getValueIfValid(cacheItems, this.cacheDefinition.keysAreEqual, this.key, new Date()) === undefined) {
+      dispatch(awaitingResultAction(this.cacheDefinition.cacheId, this.requestId, this.key, new Date()))
       return this.getPromise(getState).then(result => {
-        dispatch(resultArrivedAction(this.cacheId, this.requestId, this.key, result, new Date()))
+        dispatch(resultArrivedAction(this.cacheDefinition.cacheId, this.requestId, this.key, result, new Date()))
       })
     } else {
       return Promise.resolve()
