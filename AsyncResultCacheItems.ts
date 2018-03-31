@@ -12,21 +12,6 @@ export type AsyncResultCacheItems<Key, Result> = CacheItems<Key, AsyncResult<Res
 
 export const AsyncResultCacheItems = {
 
-  clear<Key, Value>(cache: CacheItems<Key, Value>): CacheItems<Key, Value> {
-    return cache.map(CacheItem.forceInvalid)
-  },
-
-  getAsyncResultIfValid<Key, Result>(cacheItems: CacheItems<Key, AsyncResult<Result>>, eq: (left: Key, right: Key) => boolean, key: Key, now: Date): AsyncResult<Result> | undefined {
-    const cacheItem = cacheItems.find(item => eq(item.key, key))
-    if (cacheItem === undefined) {
-      return undefined
-    } else if (!CacheItem.isValid(cacheItem, now)) {
-      return undefined
-    } else {
-      return cacheItem.value
-    }
-  },
-
   awaitingResult<Key, Result>(cacheItems: CacheItems<Key, AsyncResult<Result>>, eq: (left: Key, right: Key) => boolean, validityInMiliseconds: number, requestId: string, key: Key, now: Date): CacheItems<Key, AsyncResult<Result>> {
     const otherItems = cacheItems.filter(item => !eq(item.key, key))
     const previousCacheItem = cacheItems.find(item => eq(item.key, key))

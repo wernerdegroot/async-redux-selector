@@ -133,6 +133,6 @@ If we want, we can further specify:
 # TODO
 
 * Tests for `map` and `flatMap`
+* Tests for the reducer.
 * Flatten `CacheDefinition.selector`
 * Rename `cacheSelector` to `cacheItemsSelector` (on the input side).
-* Add actions for clearing the cache, and removing one item.

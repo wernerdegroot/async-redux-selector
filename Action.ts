@@ -52,4 +52,46 @@ export function isResultArrivedAction<Key, Result>(action: GenericAction): actio
   return action.type === RESULT_ARRIVED
 }
 
-export type ResourceAction<Key, Result> = IAwaitingResultAction<Key> | IResultArrivedAction<Key, Result>
+export const CLEAR_CACHE = 'CLEAR_CACHE'
+
+export interface IClearCacheAction {
+  type: typeof CLEAR_CACHE
+  resourceId: string
+}
+
+export function clearCacheAction(resourceId: string): IClearCacheAction {
+  return {
+    type: CLEAR_CACHE,
+    resourceId
+  }
+}
+
+export function isClearCacheAction(action: GenericAction): action is IClearCacheAction {
+  return action.type === CLEAR_CACHE
+}
+
+export const CLEAR_CACHE_ITEM = 'CLEAR_CACHE_ITEM'
+
+export interface IClearCacheItemAction<Key> {
+  type: typeof CLEAR_CACHE_ITEM
+  resourceId: string
+  key: Key
+}
+
+export function clearCacheItemAction<Key>(resourceId: string, key: Key): IClearCacheItemAction<Key> {
+  return {
+    type: CLEAR_CACHE_ITEM,
+    resourceId,
+    key
+  }
+}
+
+export function isClearCacheItemAction<Key>(action: GenericAction): action is IClearCacheItemAction<Key> {
+  return action.type === CLEAR_CACHE_ITEM
+}
+
+export type ResourceAction<Key, Result> 
+  = IAwaitingResultAction<Key>
+  | IResultArrivedAction<Key, Result>
+  | IClearCacheAction
+  | IClearCacheItemAction<Key>

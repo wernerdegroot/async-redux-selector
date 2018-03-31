@@ -56,7 +56,9 @@ export const someCacheId = 'some-resource-id'
 export const now = new Date(2018, 3, 8, 2, 4, 1)
 export const smallLifetime = 2 * 60 * 1000
 export const bigLifetime = 6 * 60 * 1000
+export const hugeLifetime = 24 * 60 * 60 * 1000
 
 const timeStepInMiliseconds = (smallLifetime + bigLifetime) / 2
 export const later = addMilliseconds(now, timeStepInMiliseconds)
 export const muchLater = addMilliseconds(later, timeStepInMiliseconds)
+export const muchMuchLater = addMilliseconds(muchLater, timeStepInMiliseconds)

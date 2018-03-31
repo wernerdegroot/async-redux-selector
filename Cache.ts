@@ -20,7 +20,7 @@ export class CacheIntermediateResult<Input, Key, Result, State> {
   public orElse(getPromise: (getState: () => State) => Promise<Result>): AsyncResultOrAdvice<Result, ResourceAction<Key, Result>, State> {
     const now = new Date()
     const requestId = uuid()
-    const possibleAsyncResult = AsyncResultCacheItems.getAsyncResultIfValid(this.cacheItems, this.keysAreEqual, this.key, now)
+    const possibleAsyncResult = CacheItems.getValueIfValid(this.cacheItems, this.keysAreEqual, this.key, now)
     if (possibleAsyncResult === undefined) {
       return new DefaultAdvice(
         getPromise,

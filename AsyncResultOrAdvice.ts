@@ -30,7 +30,7 @@ export class DefaultAdvice<Input, Key, Result, State> implements IAdvice<Resourc
 
   followAdvice = (dispatch: (action: ResourceAction<Key, Result>) => void, getState: () => State): Promise<void> => {
     const cacheItems = this.cacheItemsSelector(getState())
-    if (AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, this.keysAreEqual, this.key, new Date()) === undefined) {
+    if (CacheItems.getValueIfValid(cacheItems, this.keysAreEqual, this.key, new Date()) === undefined) {
       dispatch(awaitingResultAction(this.cacheId, this.requestId, this.key, new Date()))
       return this.getPromise(getState).then(result => {
         dispatch(resultArrivedAction(this.cacheId, this.requestId, this.key, result, new Date()))
