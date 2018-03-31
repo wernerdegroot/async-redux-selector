@@ -1,4 +1,4 @@
-import { AwaitingFirstResult, AwaitingNextResult, ResultArrived } from '../AsyncResult'
+import { AwaitingFirstResult, AwaitingNextResult, ResultArrived, AsyncResult } from '../AsyncResult'
 import { AsyncResultCacheItems } from '../AsyncResultCacheItems'
 import {
   bigLifetime,
@@ -26,14 +26,14 @@ describe('Cache items containing `AsyncResult`-instances', () => {
   it('should be able to hold a pending request', () => {
     let cacheItems: AsyncResultCacheItems<Key, Result> = []
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new AwaitingFirstResult(someRequestId))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.awaitingFirstResult(someRequestId))
   })
 
   it('should be able to hold a response', () => {
     let cacheItems: AsyncResultCacheItems<Key, Result> = []
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, now)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.resultArrived(someRequestId, someResult))
   })
 
   it('should ignore the result if the lifetime of the pending request has passed', () => {
@@ -54,7 +54,7 @@ describe('Cache items containing `AsyncResult`-instances', () => {
     let cacheItems: AsyncResultCacheItems<Key, Result> = []
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, muchLater)).toEqual(new ResultArrived(someRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, muchLater)).toEqual(AsyncResult.resultArrived(someRequestId, someResult))
   })
 
   it('should be able to hold the previous response, when a new request was made', () => {
@@ -62,7 +62,7 @@ describe('Cache items containing `AsyncResult`-instances', () => {
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, now)
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someOtherRequestId, someKey, now)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.awaitingNextResult(someOtherRequestId, someResult))
   })
 
   it('should be able to hold the previous response, when a new request was made, even if the lifetime of the previous response has passed', () => {
@@ -70,7 +70,7 @@ describe('Cache items containing `AsyncResult`-instances', () => {
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, smallLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, now)
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, smallLifetime, someOtherRequestId, someKey, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.awaitingNextResult(someOtherRequestId, someResult))
   })
 
   it('should be clearable', () => {
@@ -87,7 +87,7 @@ describe('Cache items containing `AsyncResult`-instances', () => {
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, now)
     cacheItems = AsyncResultCacheItems.clear(cacheItems)
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someOtherRequestId, someKey, now)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new AwaitingNextResult(someOtherRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.awaitingNextResult(someOtherRequestId, someResult))
   })
 
   it('should be able to handle race conditions (1)', () => {
@@ -95,9 +95,9 @@ describe('Cache items containing `AsyncResult`-instances', () => {
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someOtherRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.awaitingFirstResult(someOtherRequestId))
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someOtherRequestId, someKey, someOtherResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someOtherRequestId, someOtherResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.resultArrived(someOtherRequestId, someOtherResult))
   })
 
   it('should be able to handle race conditions (2)', () => {
@@ -105,24 +105,24 @@ describe('Cache items containing `AsyncResult`-instances', () => {
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someOtherRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someOtherRequestId, someKey, someOtherResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someOtherRequestId, someOtherResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.resultArrived(someOtherRequestId, someOtherResult))
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someOtherRequestId, someOtherResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.resultArrived(someOtherRequestId, someOtherResult))
   })
 
   it('should be able to handle multiple requests', () => {
     let cacheItems: AsyncResultCacheItems<Key, Result> = []
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someRequestId, someKey, now)
     cacheItems = AsyncResultCacheItems.awaitingResult(cacheItems, keysAreEqual, bigLifetime, someOtherRequestId, someOtherKey, now)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new AwaitingFirstResult(someRequestId))
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someOtherKey, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.awaitingFirstResult(someRequestId))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someOtherKey, later)).toEqual(AsyncResult.awaitingFirstResult(someOtherRequestId))
 
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someRequestId, someKey, someResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someRequestId, someResult))
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someOtherKey, later)).toEqual(new AwaitingFirstResult(someOtherRequestId))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.resultArrived(someRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someOtherKey, later)).toEqual(AsyncResult.awaitingFirstResult(someOtherRequestId))
 
     cacheItems = AsyncResultCacheItems.resultArrived(cacheItems, keysAreEqual, someOtherRequestId, someOtherKey, someOtherResult, later)
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(new ResultArrived(someRequestId, someResult))
-    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someOtherKey, later)).toEqual(new ResultArrived(someOtherRequestId, someOtherResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someKey, later)).toEqual(AsyncResult.resultArrived(someRequestId, someResult))
+    expect(AsyncResultCacheItems.getAsyncResultIfValid(cacheItems, keysAreEqual, someOtherKey, later)).toEqual(AsyncResult.resultArrived(someOtherRequestId, someOtherResult))
   })
 })

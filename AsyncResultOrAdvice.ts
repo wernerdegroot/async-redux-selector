@@ -84,9 +84,9 @@ export const AsyncResultOrAdvice = {
     } else if (aroa.type === AWAITING_FIRST_RESULT) {
       return aroa
     } else if (aroa.type === AWAITING_NEXT_RESULT) {
-      return new AwaitingNextResult(aroa.requestId, fn(aroa.previousResult))
+      return AsyncResult.awaitingNextResult(aroa.requestId, fn(aroa.previousResult))
     } else if (aroa.type === RESULT_ARRIVED) {
-      return new ResultArrived(aroa.requestId, fn(aroa.result))
+      return AsyncResult.resultArrived(aroa.requestId, fn(aroa.result))
     } else {
       const exhaustive: never = aroa
       throw aroa

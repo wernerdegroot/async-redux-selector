@@ -34,13 +34,13 @@ export const AsyncResultCacheItems = {
     const previousCacheItem = cacheItems.find(item => eq(item.key, key))
     let asyncResult: AsyncResult<Result>
     if (previousCacheItem === undefined) {
-      asyncResult = new AwaitingFirstResult(requestId)
+      asyncResult = AsyncResult.awaitingFirstResult(requestId)
     } else if (previousCacheItem.value.type === RESULT_ARRIVED) {
-      asyncResult = new AwaitingNextResult(requestId, previousCacheItem.value.result)
+      asyncResult = AsyncResult.awaitingNextResult(requestId, previousCacheItem.value.result)
     } else if (previousCacheItem.value.type === AWAITING_NEXT_RESULT) {
-      asyncResult = new AwaitingNextResult(requestId, previousCacheItem.value.previousResult)
+      asyncResult = AsyncResult.awaitingNextResult(requestId, previousCacheItem.value.previousResult)
     } else if (previousCacheItem.value.type === AWAITING_FIRST_RESULT) {
-      asyncResult = new AwaitingFirstResult(requestId)
+      asyncResult = AsyncResult.awaitingFirstResult(requestId)
     } else {
       const exhaustive: never = previousCacheItem.value
       throw exhaustive
@@ -55,7 +55,7 @@ export const AsyncResultCacheItems = {
       if (eq(cacheItem.key, key) && CacheItem.isValid(cacheItem, now)) {
         return CacheItem.update(
           cacheItem,
-          asyncResult => AsyncResult.resultArrived(asyncResult, requestId, result),
+          asyncResult => AsyncResult.withResultArrived(asyncResult, requestId, result),
           now
         )
       } else {
