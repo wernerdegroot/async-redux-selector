@@ -3,7 +3,7 @@ import { addMilliseconds } from 'date-fns'
 export type CacheItem<Key, Value> = Readonly<{
   key: Key,
   value: Value,
-  updated: Date,
+  updated: number, // Date.valueOf()
   validityInMiliseconds: number,
   forcedInvalid: boolean
 }>
@@ -11,7 +11,7 @@ export type CacheItem<Key, Value> = Readonly<{
 export const CacheItem = {
 
   order<Key, Value>(left: CacheItem<Key, Value>, right: CacheItem<Key, Value>): number {
-    return left.updated.valueOf() - right.updated.valueOf()
+    return left.updated - right.updated
   },
 
   forceInvalid<Key, Value>(cacheItem: CacheItem<Key, Value>): CacheItem<Key, Value> {
@@ -25,7 +25,7 @@ export const CacheItem = {
     return {
       ...cacheItem,
       value: fn(cacheItem.value),
-      updated: now
+      updated: now.valueOf()
     }
   },
 

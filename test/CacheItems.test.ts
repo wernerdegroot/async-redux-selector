@@ -19,7 +19,7 @@ describe('Cache items', () => {
       value: 'one',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: now
+      updated: now.valueOf()
     }
     
     const cacheItem2: CacheItem<number, string> = {
@@ -27,7 +27,7 @@ describe('Cache items', () => {
       value: 'two',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: later 
+      updated: later.valueOf()
     }
 
     const cacheItem3: CacheItem<number, string> = {
@@ -35,7 +35,7 @@ describe('Cache items', () => {
       value: 'three',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: muchLater 
+      updated: muchLater.valueOf()
     }
 
     const cacheItems = [cacheItem2, cacheItem1, cacheItem3]

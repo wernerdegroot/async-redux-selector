@@ -9,7 +9,7 @@ describe('CacheItem', () => {
       value: 'zero', 
       validityInMiliseconds: bigLifetime, 
       forcedInvalid: false, 
-      updated: now
+      updated: now.valueOf()
     }
 
     expect(CacheItem.isValid(expectedValid, later)).toEqual(true)
@@ -21,7 +21,7 @@ describe('CacheItem', () => {
       value: 'one', 
       validityInMiliseconds: bigLifetime, 
       forcedInvalid: false, 
-      updated: now
+      updated: now.valueOf()
     }
     const expectedInvalid = CacheItem.forceInvalid(cacheItem)
 
@@ -34,7 +34,7 @@ describe('CacheItem', () => {
       value: 'two',
       validityInMiliseconds: smallLifetime,
       forcedInvalid: false,
-      updated: now
+      updated: now.valueOf()
     }
     expect(CacheItem.isValid(expectedInvalid, later)).toEqual(false)
   })
@@ -45,7 +45,7 @@ describe('CacheItem', () => {
       value: 'three',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: now
+      updated: now.valueOf()
     }
     const updatedCacheItem = CacheItem.update(
       cacheItem,
@@ -62,7 +62,7 @@ describe('CacheItem', () => {
       value: 'one',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: now
+      updated: now.valueOf()
     }
     
     const cacheItem2: CacheItem<number, string> = {
@@ -70,7 +70,7 @@ describe('CacheItem', () => {
       value: 'two',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: later 
+      updated: later.valueOf()
     }
 
     const cacheItem3: CacheItem<number, string> = {
@@ -78,7 +78,7 @@ describe('CacheItem', () => {
       value: 'three',
       validityInMiliseconds: bigLifetime,
       forcedInvalid: false,
-      updated: muchLater 
+      updated: muchLater.valueOf()
     }
 
     expect([cacheItem2, cacheItem1, cacheItem3].sort(CacheItem.order)).toEqual([cacheItem1, cacheItem2, cacheItem3])

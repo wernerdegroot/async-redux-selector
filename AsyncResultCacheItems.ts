@@ -41,7 +41,7 @@ export const AsyncResultCacheItems = {
       const exhaustive: never = previousCacheItem.value
       throw exhaustive
     }
-    const newCacheItem: CacheItem<Key, AsyncResult<Result>> = { key, value: asyncResult, validityInMiliseconds, forcedInvalid: false, updated: now }
+    const newCacheItem: CacheItem<Key, AsyncResult<Result>> = { key, value: asyncResult, validityInMiliseconds, forcedInvalid: false, updated: now.valueOf() }
     const items = [...otherItems, newCacheItem]
     return items
   },
