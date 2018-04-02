@@ -132,6 +132,10 @@ If we want, we can further specify:
 
 # TODO
 
+* Tests for lazy list
+* Split `AsyncResult` into `RequestState` and full-featured `AsyncResult`
 * Add error state.
 * Tests for `map` and `flatMap`
 * Tests for the reducer.
+* Rename `resourceId` to `cacheId` everywhere.
+* Create an add or update function for CacheItems.
