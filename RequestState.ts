@@ -1,5 +1,10 @@
+export const NO_REQUEST = 'NO_REQUEST'
+export type NoRequest = Readonly<{
+  type: 'NO_REQUEST'
+}>
+
 export const AWAITING_RESPONSE = 'AWAITING_RESPONSE'
-export type AwaitingResponse<Response> = Readonly<{
+export type AwaitingResponse = Readonly<{
   type: 'AWAITING_RESPONSE',
   requestId: string,
 }>
@@ -12,11 +17,26 @@ export type ResponseReceived<Response> = Readonly<{
   receivedAt: number, // A `Date`-object converted to a number.
 }>
 
-export type RequestState<Response> = AwaitingResponse<Response> | ResponseReceived<Response>
+export const EXPIRED_RESPONSE = 'EXPIRED_RESPONSE'
+export type ExpiredResponse = Readonly<{
+  type: 'EXPIRED_RESPONSE'
+}>
+
+export type RequestState<Response> 
+  = NoRequest
+  | AwaitingResponse
+  | ResponseReceived<Response>
+  | ExpiredResponse
 
 export const RequestState = {
 
-  awaitingResponse<Response>(requestId: string): AwaitingResponse<Response> {
+  noRequest(): NoRequest {
+    return {
+      type: NO_REQUEST
+    }
+  },
+
+  awaitingResponse(requestId: string): AwaitingResponse {
     return {
       type: AWAITING_RESPONSE,
       requestId,
@@ -29,6 +49,12 @@ export const RequestState = {
       requestId,
       response,
       receivedAt: receivedAt.valueOf()
+    }
+  },
+
+  expiredResponse(): ExpiredResponse {
+    return {
+      type: EXPIRED_RESPONSE
     }
   }
 }
