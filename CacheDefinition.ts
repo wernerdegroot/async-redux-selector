@@ -44,7 +44,7 @@ export class CacheDefinition<Input, Key, Response, State> {
       return cacheItems
     }
 
-    // Filter the REQUEST_CANCELLED out here.
+    // Filter the REQUEST_CANCELLED out here. Or maybe do that in the functions for clearing the cache.
     // Do truncation here.
   }
 }
