@@ -1,48 +1,22 @@
-import { RequestState, ResponseReceived, AWAITING_RESPONSE, RESPONSE_RECEIVED } from "./RequestState";
+import { addMilliseconds } from 'date-fns'
+import { AwaitingResponse, ResponseReceived, RequestState, RESPONSE_RECEIVED } from './RequestState'
+import { ResourceAction, isAwaitingResultAction, isResultArrivedAction, isClearCacheAction, isClearCacheItemAction, GenericAction } from './Action';
 
-export type CacheItem<Response> = Readonly<{
-  current: RequestState<Response>,
-  previousResponses: Array<ResponseReceived<Response>>
+export type CacheItem<Key, Response> = Readonly<{
+  key: Key,
+  requestState: RequestState<Response>,
+  updatedAt: number // `Date` as a `number`.
 }>
 
-export const RequestStateHistory = {
-  noRequest<Response>(): CacheItem<Response> {
-    return {
-      current: RequestState.noRequest(),
-      previousResponses: []
-    }
-  },
+export const CacheItem = {
 
-  awaitingResponse<Response>(requestStateHistory: CacheItem<Response>, requestId: string): CacheItem<Response> {
-    return {
-      current: RequestState.awaitingResponse(requestId),
-      previousResponses: RequestStateHistory.allResponses(requestStateHistory)
-    }
-  },
+  hasResponse<Key, Response>(cacheItems: Array<CacheItem<Key, Response>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
+    const cacheItemWithResponse = cacheItems.find(cacheItem => {
+      return keysAreEqual(cacheItem.key, key)
+        && cacheItem.requestState.type === RESPONSE_RECEIVED
+        && cacheItem.updatedAt + validityInMiliseconds > now.valueOf()
+    })
 
-  responseReceived<Response>(requestStateHistory: CacheItem<Response>, requestId: string, response: Response, now: Date): CacheItem<Response> {
-    if (requestStateHistory.current.type === AWAITING_RESPONSE && requestStateHistory.current.requestId === requestId) {
-      return {
-        current: RequestState.responseReceived(requestId, response, now),
-        previousResponses: requestStateHistory.previousResponses
-      }
-    } else {
-      return requestStateHistory
-    }
-  },
-
-  responseExpired<Response>(requestStateHistory: CacheItem<Response>): CacheItem<Response> {
-    return {
-      current: RequestState.expiredResponse(),
-      previousResponses: RequestStateHistory.allResponses(requestStateHistory)
-    }
-  },
-
-  allResponses<Response>(requestStateHistory: CacheItem<Response>) {
-    if (requestStateHistory.current.type === RESPONSE_RECEIVED) {
-      return [requestStateHistory.current, ...requestStateHistory.previousResponses]
-    } else {
-      return requestStateHistory.previousResponses
-    }
+    return cacheItemWithResponse !== undefined
   }
 }
