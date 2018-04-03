@@ -1,6 +1,3 @@
-import { ResourceAction, awaitingResultAction, resultArrivedAction } from "./Action";
-import { CacheDefinition } from "./CacheDefinition";
-
 export const AWAITING_RESPONSE = 'AWAITING_RESPONSE'
 export type AwaitingResponse = Readonly<{
   type: 'AWAITING_RESPONSE'

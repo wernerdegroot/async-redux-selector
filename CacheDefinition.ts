@@ -14,15 +14,17 @@ export class CacheDefinition<Input, Key, Response, State> {
   }
 
   public cacheItemsReducer = (cacheItems: CacheItem<Key, Response>[] = [], action: GenericAction) => {
+
+    // Check the resource id here.
+
     if (isAwaitingResultAction<Key>(action)) {
-      const cacheItem = {
-        key: action.key,
-        requestState: RequestState.awaitingResponse(action.requestId),
-        updatedAt: action.currentTime.valueOf()
-      }
       return [
-        cacheItem,
-        ...cacheItems
+        {
+          key: action.key,
+          requestState: RequestState.awaitingResponse(action.requestId),
+          updatedAt: action.currentTime.valueOf()
+        },
+        ...CacheItem.expireForKey(cacheItems, this.keysAreEqual, action.key, this.validityInMiliseconds, action.currentTime)
       ]
     } else if (isResultArrivedAction<Key, Response>(action)) {
       return cacheItems.map(cacheItem => ({
@@ -37,19 +39,12 @@ export class CacheDefinition<Input, Key, Response, State> {
         updatedAt: action.currentTime.valueOf()
       }))
     } else if (isClearCacheItemAction<Key>(action)) {
-      return cacheItems.map(cacheItem => {
-        if (this.keysAreEqual(cacheItem.key, action.key)) {
-          return {
-            key: cacheItem.key,
-            requestState: RequestState.expire(cacheItem.requestState),
-            updatedAt: action.currentTime.valueOf()
-          }
-        } else {
-          return cacheItem
-        }
-      })
+      return CacheItem.expireForKey(cacheItems, this.keysAreEqual, action.key, this.validityInMiliseconds, action.currentTime)
     } else {
       return cacheItems
     }
+
+    // Filter the REQUEST_CANCELLED out here.
+    // Do truncation here.
   }
 }

@@ -1,6 +1,4 @@
-import { addMilliseconds } from 'date-fns'
-import { AwaitingResponse, ResponseReceived, RequestState, RESPONSE_RECEIVED } from './RequestState'
-import { ResourceAction, isAwaitingResultAction, isResultArrivedAction, isClearCacheAction, isClearCacheItemAction, GenericAction } from './Action';
+import { RequestState, RESPONSE_RECEIVED } from './RequestState'
 
 export type CacheItem<Key, Response> = Readonly<{
   key: Key,
@@ -18,5 +16,19 @@ export const CacheItem = {
     })
 
     return cacheItemWithResponse !== undefined
+  },
+
+  expireForKey<Key, Response>(cacheItems: Array<CacheItem<Key, Response>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
+    return cacheItems.map(cacheItem => {
+      if (keysAreEqual(cacheItem.key, key)) {
+        return {
+          key: cacheItem.key,
+          requestState: RequestState.expire(cacheItem.requestState),
+          updatedAt: now.valueOf()
+        }
+      } else {
+        return cacheItem
+      }
+    })
   }
 }

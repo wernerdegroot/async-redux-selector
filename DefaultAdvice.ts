@@ -1,7 +1,7 @@
-import { ADVICE, Advice } from "./AsyncResultCandidate";
-import { ResourceAction, awaitingResultAction, resultArrivedAction } from "./Action";
-import { CacheDefinition } from "./CacheDefinition";
-import { CacheItem } from "./CacheItem";
+import { awaitingResultAction, ResourceAction, resultArrivedAction } from './Action'
+import { ADVICE, Advice } from './AsyncResultCandidate'
+import { CacheDefinition } from './CacheDefinition'
+import { CacheItem } from './CacheItem'
 
 export class DefaultAdvice<Input, Key, Result, State> implements Advice<ResourceAction<Key, Result>, State> {
   readonly type: 'ADVICE' = ADVICE
