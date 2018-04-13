@@ -1,4 +1,4 @@
-import { RequestState, RESPONSE_RECEIVED } from './RequestState'
+import { RequestState, RESULT_RECEIVED } from './RequestState'
 
 export type CacheItem<Key, Response> = Readonly<{
   key: Key,
@@ -11,7 +11,7 @@ export const CacheItem = {
   hasResponse<Key, Response>(cacheItems: Array<CacheItem<Key, Response>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
     const cacheItemWithResponse = cacheItems.find(cacheItem => {
       return keysAreEqual(cacheItem.key, key)
-        && cacheItem.requestState.type === RESPONSE_RECEIVED
+        && cacheItem.requestState.type === RESULT_RECEIVED
         && cacheItem.updatedAt + validityInMiliseconds > now.valueOf()
     })
 

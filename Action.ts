@@ -94,7 +94,7 @@ export function isClearCacheItemAction<Key>(action: GenericAction): action is IC
   return action.type === CLEAR_CACHE_ITEM
 }
 
-export type ResourceAction<Key, Result> 
+export type ResourceAction<Key, Result>
   = IAwaitingResultAction<Key>
   | IResultArrivedAction<Key, Result>
   | IClearCacheAction

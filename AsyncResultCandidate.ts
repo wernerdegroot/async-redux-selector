@@ -1,11 +1,11 @@
 export const AWAITING_RESPONSE = 'AWAITING_RESPONSE'
 export type AwaitingResponse = Readonly<{
-  type: 'AWAITING_RESPONSE'
+  type: 'AWAITING_RESULT'
 }>
 
 export const RESPONSE_RECEIVED = 'RESPONSE_RECEIVED'
 export type ResponseReceived<Response> = Readonly<{
-  type: 'RESPONSE_RECEIVED',
+  type: 'RESULT_RECEIVED',
   response: Response
 }>
 

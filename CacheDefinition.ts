@@ -21,7 +21,7 @@ export class CacheDefinition<Input, Key, Response, State> {
       return [
         {
           key: action.key,
-          requestState: RequestState.awaitingResponse(action.requestId),
+          requestState: RequestState.awaitingResult(action.requestId),
           updatedAt: action.currentTime.valueOf()
         },
         ...CacheItem.expireForKey(cacheItems, this.keysAreEqual, action.key, this.validityInMiliseconds, action.currentTime)
@@ -29,7 +29,7 @@ export class CacheDefinition<Input, Key, Response, State> {
     } else if (isResultArrivedAction<Key, Response>(action)) {
       return cacheItems.map(cacheItem => ({
         key: cacheItem.key,
-        requestState: RequestState.handleResponse(cacheItem.requestState, action.requestId, action.result),
+        requestState: RequestState.handleResult(cacheItem.requestState, action.requestId, action.result),
         updatedAt: action.currentTime.valueOf()
       }))
     } else if (isClearCacheAction(action)) {

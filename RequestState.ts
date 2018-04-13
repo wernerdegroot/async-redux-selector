@@ -1,7 +1,7 @@
-export const AWAITING_RESPONSE = 'AWAITING_RESPONSE'
-export type AwaitingResponse = Readonly<{
-  type: 'AWAITING_RESPONSE',
-  requestId: string,
+export const AWAITING_RESULT = 'AWAITING_RESULT'
+export type AwaitingResult = Readonly<{
+  type: 'AWAITING_RESULT',
+  requestId: string
 }>
 
 export const REQUEST_CANCELLED = 'REQUEST_CANCELLED'
@@ -9,29 +9,29 @@ export type RequestCancelled = Readonly<{
   type: 'REQUEST_CANCELLED',
 }>
 
-export const RESPONSE_RECEIVED = 'RESPONSE_RECEIVED'
-export type ResponseReceived<Response> = Readonly<{
-  type: 'RESPONSE_RECEIVED',
+export const RESULT_RECEIVED = 'RESULT_RECEIVED'
+export type ResultReceived<Response> = Readonly<{
+  type: 'RESULT_RECEIVED',
   response: Response
 }>
 
-export const RESPONSE_EXPIRED = 'RESPONSE_EXPIRED'
-export type ResponseExpired<Response> = Readonly<{
-  type: 'RESPONSE_EXPIRED',
+export const RESULT_EXPIRED = 'RESULT_EXPIRED'
+export type ResultExpired<Response> = Readonly<{
+  type: 'RESULT_EXPIRED',
   response: Response
 }>
 
-export type RequestState<Response> 
-  = AwaitingResponse
+export type RequestState<Result>
+  = AwaitingResult
   | RequestCancelled
-  | ResponseReceived<Response>
-  | ResponseExpired<Response>
+  | ResultReceived<Result>
+  | ResultExpired<Result>
 
 export const RequestState = {
 
-  awaitingResponse(requestId: string): AwaitingResponse {
+  awaitingResult(requestId: string): AwaitingResult {
     return {
-      type: AWAITING_RESPONSE,
+      type: AWAITING_RESULT,
       requestId,
     }
   },
@@ -42,32 +42,32 @@ export const RequestState = {
     }
   },
 
-  responseReceived<Response>(response: Response): ResponseReceived<Response> {
+  resultReceived<Response>(response: Response): ResultReceived<Response> {
     return {
-      type: RESPONSE_RECEIVED,
+      type: RESULT_RECEIVED,
       response
     }
   },
 
-  responseExpired<Response>(response: Response): ResponseExpired<Response> {
+  resultExpired<Response>(response: Response): ResultExpired<Response> {
     return {
-      type: RESPONSE_EXPIRED,
+      type: RESULT_EXPIRED,
       response
     }
   },
 
-  handleResponse<Response>(requestState: RequestState<Response>, requestId: string, response: Response): RequestState<Response> {
-    if (requestState.type === AWAITING_RESPONSE && requestState.requestId === requestId) {
-      return RequestState.responseReceived(response)
+  handleResult<Result>(requestState: RequestState<Result>, requestId: string, result: Result): RequestState<Result> {
+    if (requestState.type === AWAITING_RESULT && requestState.requestId === requestId) {
+      return RequestState.resultReceived(result)
     } else {
       return requestState
     }
   },
 
   expire<Response>(requestState: RequestState<Response>): RequestState<Response> {
-    if (requestState.type === RESPONSE_RECEIVED) {
-      return RequestState.responseExpired(requestState.response)
-    } else if (requestState.type === AWAITING_RESPONSE) {
+    if (requestState.type === RESULT_RECEIVED) {
+      return RequestState.resultExpired(requestState.response)
+    } else if (requestState.type === AWAITING_RESULT) {
       return RequestState.requestCancelled()
     } else {
       return requestState
