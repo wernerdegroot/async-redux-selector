@@ -1,24 +1,22 @@
-export const AWAITING_RESULT = 'AWAITING_RESULT'
+import { AWAITING_RESULT, REQUEST_CANCELLED, RESULT_EXPIRED, RESULT_RECEIVED } from './consts'
+
 export type AwaitingResult = Readonly<{
   type: 'AWAITING_RESULT',
   requestId: string
 }>
 
-export const REQUEST_CANCELLED = 'REQUEST_CANCELLED'
 export type RequestCancelled = Readonly<{
   type: 'REQUEST_CANCELLED',
 }>
 
-export const RESULT_RECEIVED = 'RESULT_RECEIVED'
 export type ResultReceived<Response> = Readonly<{
   type: 'RESULT_RECEIVED',
-  response: Response
+  result: Response
 }>
 
-export const RESULT_EXPIRED = 'RESULT_EXPIRED'
 export type ResultExpired<Response> = Readonly<{
   type: 'RESULT_EXPIRED',
-  response: Response
+  result: Response
 }>
 
 export type RequestState<Result>
@@ -42,17 +40,17 @@ export const RequestState = {
     }
   },
 
-  resultReceived<Response>(response: Response): ResultReceived<Response> {
+  resultReceived<Result>(result: Result): ResultReceived<Result> {
     return {
       type: RESULT_RECEIVED,
-      response
+      result
     }
   },
 
-  resultExpired<Response>(response: Response): ResultExpired<Response> {
+  resultExpired<Result>(result: Result): ResultExpired<Result> {
     return {
       type: RESULT_EXPIRED,
-      response
+      result
     }
   },
 
@@ -66,7 +64,7 @@ export const RequestState = {
 
   expire<Response>(requestState: RequestState<Response>): RequestState<Response> {
     if (requestState.type === RESULT_RECEIVED) {
-      return RequestState.resultExpired(requestState.response)
+      return RequestState.resultExpired(requestState.result)
     } else if (requestState.type === AWAITING_RESULT) {
       return RequestState.requestCancelled()
     } else {

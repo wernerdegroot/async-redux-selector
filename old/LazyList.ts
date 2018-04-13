@@ -24,6 +24,19 @@ export type LazyList<A> = Lazy<LazyCons<A> | LazyNil>
 
 export const LazyList = {
 
+  empty<A>(): LazyList<A> {
+    return Lazy.of(() => null)
+  },
+
+  singleton<A>(a: Lazy<A>): LazyList<A> {
+    return Lazy.of(() => {
+      return {
+        head: a(),
+        tail: LazyList.empty<A>()
+      }
+    })
+  },
+
   fromArray<A>(lst: A[]): LazyList<A> {
     return Lazy.of(() => {
       if (lst.length <= 0) {
@@ -96,6 +109,25 @@ export const LazyList = {
         return {
           head: fn(evaluated.head),
           tail: LazyList.map(evaluated.tail, fn)
+        }
+      }
+    })
+  },
+
+  filter<A, B>(ll: LazyList<A>, predicate: (a: A) => B | false): LazyList<B> {
+    return Lazy.of(() => {
+      const evaluated = ll()
+      if (evaluated === null) {
+        return null
+      } else {
+        const b = predicate(evaluated.head)
+        if (b === false) {
+          return LazyList.filter(evaluated.tail, predicate)()
+        } else {
+          return {
+            head: b,
+            tail: LazyList.filter(evaluated.tail, predicate)
+          }
         }
       }
     })

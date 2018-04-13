@@ -1,24 +1,24 @@
 import { RequestState, RESULT_RECEIVED } from './RequestState'
 
-export type CacheItem<Key, Response> = Readonly<{
+export type CacheItem<Key, Result> = Readonly<{
   key: Key,
-  requestState: RequestState<Response>,
+  requestState: RequestState<Result>,
   updatedAt: number // `Date` as a `number`.
 }>
 
 export const CacheItem = {
 
-  hasResponse<Key, Response>(cacheItems: Array<CacheItem<Key, Response>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
-    const cacheItemWithResponse = cacheItems.find(cacheItem => {
+  hasResult<Key, Result>(cacheItems: Array<CacheItem<Key, Result>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
+    const cacheItemWithResult = cacheItems.find(cacheItem => {
       return keysAreEqual(cacheItem.key, key)
         && cacheItem.requestState.type === RESULT_RECEIVED
         && cacheItem.updatedAt + validityInMiliseconds > now.valueOf()
     })
 
-    return cacheItemWithResponse !== undefined
+    return cacheItemWithResult !== undefined
   },
 
-  expireForKey<Key, Response>(cacheItems: Array<CacheItem<Key, Response>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
+  expireForKey<Key, Result>(cacheItems: Array<CacheItem<Key, Result>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, now: Date) {
     return cacheItems.map(cacheItem => {
       if (keysAreEqual(cacheItem.key, key)) {
         return {
