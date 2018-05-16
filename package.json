@@ -1,0 +1,41 @@
+{
+  "name": "async-redux-selector",
+  "version": "0.0.9",
+  "description": "Asynchronous Redux selectors",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc -p . --p tsconfig.test.json && jest --no-cache && npm run clean",
+    "clean": "rm -rf {*.js,*.d.ts,test/*.js,test/*.d.ts}",
+    "compile": "npm run clean && tsc -p .",
+    "prepublishOnly": "npm run test && npm run compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wernerdegroot/async-redux-selector"
+  },
+  "keywords": [
+    "Typescript",
+    "Asynchronous",
+    "Redux",
+    "Selector"
+  ],
+  "author": "Werner de Groot",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wernerdegroot/async-redux-selector/issues"
+  },
+  "homepage": "https://github.com/wernerdegroot/async-redux-selector#readme",
+  "devDependencies": {
+    "@types/jest": "^22.1.2",
+    "jest": "^22.3.0",
+    "typescript": "^2.7.1",
+    "@types/uuid": "^3.4.3"
+  },
+  "jest": {
+    "testRegex": "/test/.*\\.test\\.js$"
+  },
+  "dependencies": {
+    "date-fns": "^1.29.0",
+    "node-uuid": "^1.4.8"
+  }
+}
