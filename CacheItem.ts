@@ -6,6 +6,10 @@ export type CacheItem<Key, Result> = Readonly<{
   requestState: RequestState.RequestState<Result>
 }>
 
+export function ordering(left: CacheItem<any, any>, right: CacheItem<any, any>): number {
+  return RequestState.ordering(left.requestState, right.requestState)
+}
+
 export function handleResult<Key, Result>(cacheItem: CacheItem<Key, Result>, key: Key, requestId: string, result: Result, currentTime: number, keysAreEqual: (left: Key, right: Key) => boolean): CacheItem<Key, Result> {
   if (keysAreEqual(cacheItem.key, key) && cacheItem.requestState.type === AWAITING_RESULT && cacheItem.requestState.requestId === requestId) {
     return {

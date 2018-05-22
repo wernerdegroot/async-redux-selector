@@ -6,3 +6,7 @@ export function addMilliseconds(date: Date, milliseconds: number): Date {
   return new Date(date.valueOf() + milliseconds)
 }
 
+export function flatten<A>(as: A[][]): A[] {
+  return as.reduce((acc: A[], curr: A[]) => [...acc, ...curr], [])
+}
+

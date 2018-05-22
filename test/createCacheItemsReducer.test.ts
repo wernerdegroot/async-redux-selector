@@ -13,14 +13,11 @@ import {
 } from './data'
 import { AWAITING_RESULT, RESULT_EXPIRED, RESULT_RECEIVED } from '../consts'
 import { addSeconds } from '../utils'
+import { numbersAreEqual } from './util'
 
 describe('createCacheItemsReducer', () => {
 
   const resourceId = 'resource-id'
-
-  function numbersAreEqual(left: number, right: number): boolean {
-    return left === right
-  }
 
   const reducer = createCacheItemsReducer<number, string>(resourceId, numbersAreEqual, smallValidity, 3)
 
