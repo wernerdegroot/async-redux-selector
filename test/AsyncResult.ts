@@ -289,11 +289,11 @@ describe('AsyncResult', () => {
       const ownerCacheItems: CacheItem<number, Owner>[] = [
         {
           key: 1,
-          requestState: {type: RESULT_RECEIVED, result: {id: 1, name: 'Marianne Rutherford-Jackson'}, updatedAt: dateTime2.valueOf()}
+          requestState: {type: RESULT_EXPIRED, result: {id: 1, name: 'Marianne Rutherford'}, updatedAt: dateTime2.valueOf()}
         },
         {
           key: 1,
-          requestState: {type: RESULT_EXPIRED, result: {id: 1, name: 'Marianne Rutherford'}, updatedAt: dateTime2.valueOf()}
+          requestState: {type: RESULT_RECEIVED, result: {id: 1, name: 'Marianne Rutherford-Jackson'}, updatedAt: dateTime2.valueOf()}
         }
       ]
       const catAsyncResult = AsyncResult.forKey(catCacheItems, 'bob-the-cat', stringsAreEqual, factory())
