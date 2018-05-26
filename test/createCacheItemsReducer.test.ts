@@ -87,6 +87,21 @@ describe('createCacheItemsReducer', () => {
     ]))
   })
 
+  it('should cancel any previous requests for the same key when a new request starts', () => {
+    const state = reduce([
+      Action.awaitingResultAction(resourceId, requestId1, 1, dateTime1),
+      Action.awaitingResultAction(resourceId, requestId2, 1, dateTime1),
+    ])
+
+    expect(state).toHaveLength(1)
+    expect(state).toEqual(expect.arrayContaining([
+      {
+        key: 1,
+        requestState: {type: AWAITING_RESULT, requestId: requestId2, updatedAt: dateTime1.valueOf()}
+      }
+    ]))
+  })
+
   it('should be able to handle race conditions (first response arriving earlier)', () => {
     const state = reduce([
       Action.awaitingResultAction(resourceId, requestId1, 1, dateTime1),
