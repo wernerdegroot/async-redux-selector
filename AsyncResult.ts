@@ -10,7 +10,7 @@ export type AsyncResult<Result>
   | Advice<Result>
 
 export class AwaitingResult<Result> {
-  public readonly type: 'AWAITING_RESULT'
+  public readonly type: 'AWAITING_RESULT' = AWAITING_RESULT
 
   constructor(
     public readonly previousResults: Result[]) {
@@ -19,7 +19,7 @@ export class AwaitingResult<Result> {
 }
 
 export class ResultReceived<Result> {
-  public readonly type: 'RESULT_RECEIVED'
+  public readonly type: 'RESULT_RECEIVED' = RESULT_RECEIVED
 
   constructor(
     public readonly result: Result,
@@ -29,7 +29,7 @@ export class ResultReceived<Result> {
 }
 
 export class Advice<Result> {
-  public readonly type: 'ADVICE'
+  public readonly type: 'ADVICE' = ADVICE
 
   constructor(public readonly previousResults: Result[]) {
   }
@@ -73,8 +73,10 @@ export function forKey<Key, Result>(cacheItems: CacheItem.CacheItem<Key, Result>
     }
   }, [])
 
-  if (head === undefined || head.requestState.type === RESULT_EXPIRED || head.requestState.type === REQUEST_CANCELLED) {
+  if (head === undefined || head.requestState.type === REQUEST_CANCELLED) {
     return factory.advice(previousResults)
+  } else if (head.requestState.type === RESULT_EXPIRED) {
+    return factory.advice([head.requestState.result, ...previousResults])
   } else {
     if (head.requestState.type === AWAITING_RESULT) {
       return factory.awaitingResult(previousResults)
@@ -103,7 +105,11 @@ export function map<A, B>(asyncResult: AsyncResult<A>, fn: (a: A) => B): AsyncRe
 }
 
 export function flatMap<A, B>(asyncResult: AsyncResult<A>, fn: (a: A) => AsyncResult<B>, factory: Factory<B>): AsyncResult<B> {
-  const flatMappedPreviousResults = flatten(asyncResult.previousResults.map(fn).map(ar => ar.previousResults))
+  const flatMappedPreviousResults = flatten(asyncResult.previousResults.map(fn).map(ar =>
+    ar.type === RESULT_RECEIVED
+      ? [ar.result, ...ar.previousResults]
+      : ar.previousResults
+  ))
   switch (asyncResult.type) {
     case AWAITING_RESULT:
       return factory.awaitingResult(flatMappedPreviousResults)

@@ -3,13 +3,10 @@ import { createCacheItemsReducer } from '../createCacheItemsReducer'
 import * as Action from '../Action'
 import {
   dateTime1,
-  dateTime2,
-  dateTime3,
   requestId1,
   requestId2,
   requestId3,
   requestId4,
-  smallValidity
 } from './data'
 import { AWAITING_RESULT, RESULT_EXPIRED, RESULT_RECEIVED } from '../consts'
 import { addSeconds } from '../utils'
@@ -19,7 +16,7 @@ describe('createCacheItemsReducer', () => {
 
   const resourceId = 'resource-id'
 
-  const reducer = createCacheItemsReducer<number, string>(resourceId, numbersAreEqual, smallValidity, 3)
+  const reducer = createCacheItemsReducer<number, string>(resourceId, numbersAreEqual, 3)
 
   function reduce(actions: Action.GenericAction[]) {
     return actions.reduce<Array<CacheItem.CacheItem<number, string>>>(reducer, [])
@@ -221,40 +218,6 @@ describe('createCacheItemsReducer', () => {
       {
         key: 4,
         requestState: {type: AWAITING_RESULT, requestId: requestId4, updatedAt: addSeconds(dateTime1, 4).valueOf()}
-      }
-    ]))
-  })
-
-  it('should be able to hold a response if its lifetime has not yet passed', () => {
-    const state = reduce([
-      Action.awaitingResultAction(resourceId, requestId1, 1, dateTime1),
-      Action.resultReceivedAction(resourceId, requestId1, 1, 'one', dateTime1),
-
-      // Another action, to trigger expiration:
-      Action.awaitingResultAction(resourceId, requestId2, 2, dateTime2)
-    ])
-
-    expect(state).toEqual(expect.arrayContaining([
-      {
-        key: 1,
-        requestState: {type: RESULT_RECEIVED, result: 'one', updatedAt: dateTime1.valueOf()}
-      }
-    ]))
-  })
-
-  it('should be able to hold an expired response if its lifetime has passed', () => {
-    const state = reduce([
-      Action.awaitingResultAction(resourceId, requestId1, 1, dateTime1),
-      Action.resultReceivedAction(resourceId, requestId1, 1, 'one', dateTime1),
-
-      // Another action, to trigger expiration:
-      Action.awaitingResultAction(resourceId, requestId2, 2, dateTime3)
-    ])
-
-    expect(state).toEqual(expect.arrayContaining([
-      {
-        key: 1,
-        requestState: {type: RESULT_EXPIRED, result: 'one', updatedAt: dateTime3.valueOf()}
       }
     ]))
   })

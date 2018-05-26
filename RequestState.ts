@@ -8,7 +8,7 @@ export type AwaitingResult = Readonly<{
 
 export type RequestCancelled = Readonly<{
   type: 'REQUEST_CANCELLED',
-  updatedAt: number
+  updatedAt: number // `Date` as a `number`.
 }>
 
 export type ResultReceived<Result> = Readonly<{

@@ -37,25 +37,7 @@ export function expire<Key, Result>(cacheItem: CacheItem<Key, Result>, currentTi
   }
 }
 
-export function expireIfNoLongerValid<Key, Result>(cacheItem: CacheItem<Key, Result>, validityInMiliseconds: number, currentTime: number): CacheItem<Key, Result> {
-  if (cacheItem.requestState.updatedAt + validityInMiliseconds < currentTime) {
-    return expire(cacheItem, currentTime)
-  } else {
-    return cacheItem
-  }
-}
-
-export function hasResult<Key, Result>(cacheItems: Array<CacheItem<Key, Result>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, currentTime: number) {
-  const cacheItemWithResult = cacheItems.find(cacheItem => {
-    return keysAreEqual(cacheItem.key, key)
-      && cacheItem.requestState.type === RESULT_RECEIVED
-      && cacheItem.requestState.updatedAt + validityInMiliseconds > currentTime
-  })
-
-  return cacheItemWithResult !== undefined
-}
-
-export function expireForKey<Key, Result>(cacheItems: Array<CacheItem<Key, Result>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, validityInMiliseconds: number, currentTime: number) {
+export function expireForKey<Key, Result>(cacheItems: Array<CacheItem<Key, Result>>, keysAreEqual: (left: Key, right: Key) => boolean, key: Key, currentTime: number) {
   return cacheItems.map(cacheItem => {
     if (keysAreEqual(cacheItem.key, key)) {
       return expire(cacheItem, currentTime)

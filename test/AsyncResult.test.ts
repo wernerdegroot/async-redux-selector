@@ -87,12 +87,12 @@ describe('AsyncResult', () => {
         },
         {
           key: 1,
-          requestState: {type: RESULT_EXPIRED, result: 'one', updatedAt: dateTime2.valueOf()}
+          requestState: {type: RESULT_EXPIRED, result: 'one', updatedAt: dateTime1.valueOf()}
         }
       ]
       const asyncResult = AsyncResult.forKey(cacheItems, 1, numbersAreEqual, factory())
       if (asyncResult.type === AWAITING_RESULT) {
-        expect(asyncResult.previousResults).toEqual(['one', 'eins'])
+        expect(asyncResult.previousResults).toEqual(['eins', 'one'])
       } else {
         fail()
       }
@@ -209,7 +209,7 @@ describe('AsyncResult', () => {
         factory()
       )
       if (ownerAsyncResult.type === AWAITING_RESULT) {
-        expect(ownerAsyncResult.previousResults).toEqual([{id: 1, name: 'Marianne'}])
+        expect(ownerAsyncResult.previousResults).toEqual([{id: 1, name: 'Marianne'}, {id: 1, name: 'Marianne'}])
       } else {
         fail()
       }
@@ -239,7 +239,7 @@ describe('AsyncResult', () => {
         factory()
       )
       if (ownerAsyncResult.type === ADVICE) {
-        expect(ownerAsyncResult.previousResults).toEqual([{id: 1, name: 'Marianne'}])
+        expect(ownerAsyncResult.previousResults).toEqual([{id: 1, name: 'Marianne'}, {id: 1, name: 'Marianne'}])
       } else {
         fail()
       }

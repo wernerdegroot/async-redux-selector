@@ -3,7 +3,7 @@ import * as Action from './Action'
 import * as RequestState from './RequestState'
 import { REQUEST_CANCELLED } from './consts'
 
-export const createCacheItemsReducer = <Key, Result>(resourceId: string, keysAreEqual: (left: Key, right: Key) => boolean, validityInMiliseconds: number, maxCacheSize: number) => (cacheItems: Array<CacheItem.CacheItem<Key, Result>> = [], action: Action.Action<Key, Result>): Array<CacheItem.CacheItem<Key, Result>> => {
+export const createCacheItemsReducer = <Key, Result>(resourceId: string, keysAreEqual: (left: Key, right: Key) => boolean, maxCacheSize: number) => (cacheItems: Array<CacheItem.CacheItem<Key, Result>> = [], action: Action.Action<Key, Result>): Array<CacheItem.CacheItem<Key, Result>> => {
 
   function handleAction(cacheItems: Array<CacheItem.CacheItem<Key, Result>>): Array<CacheItem.CacheItem<Key, Result>> {
     if (Action.isAction(action) && action.resourceId !== resourceId) {
@@ -16,22 +16,18 @@ export const createCacheItemsReducer = <Key, Result>(resourceId: string, keysAre
           key: action.key,
           requestState: RequestState.awaitingResult(action.requestId, action.currentTime),
         },
-        ...CacheItem.expireForKey(cacheItems, keysAreEqual, action.key, validityInMiliseconds, action.currentTime)
+        ...CacheItem.expireForKey(cacheItems, keysAreEqual, action.key, action.currentTime)
       ]
     } else if (Action.isResultReceivedAction<Key, Result>(action)) {
       return cacheItems.map(cacheItem => CacheItem.handleResult(cacheItem, action.key, action.requestId, action.result, action.currentTime, keysAreEqual))
     } else if (Action.isClearCacheAction(action)) {
       return cacheItems.map(cacheItem => CacheItem.expire(cacheItem, action.currentTime))
     } else if (Action.isClearCacheItemAction<Key>(action)) {
-      return CacheItem.expireForKey(cacheItems, keysAreEqual, action.key, validityInMiliseconds, action.currentTime)
+      return CacheItem.expireForKey(cacheItems, keysAreEqual, action.key, action.currentTime)
     } else {
       // This clause should never be reached. It's better to be safe than sorry, so we'll handle this case anyway.
       return cacheItems
     }
-  }
-
-  function expireIfNoLongerValid(cacheItems: Array<CacheItem.CacheItem<Key, Result>>): Array<CacheItem.CacheItem<Key, Result>> {
-    return cacheItems.map(cacheItem => CacheItem.expireIfNoLongerValid(cacheItem, validityInMiliseconds, action.currentTime))
   }
 
   function filterCancelledRequests(cacheItems: Array<CacheItem.CacheItem<Key, Result>>): Array<CacheItem.CacheItem<Key, Result>> {
@@ -44,7 +40,6 @@ export const createCacheItemsReducer = <Key, Result>(resourceId: string, keysAre
 
   return [
     handleAction,
-    expireIfNoLongerValid,
     filterCancelledRequests,
     limitCacheItems
   ].reduce((x, f) => f(x), cacheItems)
