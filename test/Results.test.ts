@@ -106,11 +106,11 @@ describe('Results', () => {
       const cacheItems: CacheItem<number, string>[] = [
         {
           key: 1,
-          requestState: {type: RESULT_RECEIVED, result: 'one', updatedAt: dateTime3.valueOf()}
+          requestState: {type: RESULT_EXPIRED, result: 'een', updatedAt: dateTime1.valueOf()}
         },
         {
           key: 1,
-          requestState: {type: RESULT_RECEIVED, result: 'uno', updatedAt: dateTime2.valueOf()}
+          requestState: {type: RESULT_RECEIVED, result: 'one', updatedAt: dateTime3.valueOf()}
         },
         {
           key: 1,
@@ -118,7 +118,7 @@ describe('Results', () => {
         },
         {
           key: 1,
-          requestState: {type: RESULT_EXPIRED, result: 'een', updatedAt: dateTime1.valueOf()}
+          requestState: {type: RESULT_RECEIVED, result: 'uno', updatedAt: dateTime2.valueOf()}
         }
       ]
       const results = AsyncResult.allAvailable(cacheItems, 1, numbersAreEqual)

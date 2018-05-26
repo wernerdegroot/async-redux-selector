@@ -46,3 +46,9 @@ export function expireForKey<Key, Result>(cacheItems: Array<CacheItem<Key, Resul
     }
   })
 }
+
+export function forKey<Key, Result>(cacheItems: CacheItem<Key, Result>[], key: Key, keysAreEqual: (left: Key, right: Key) => boolean): CacheItem<Key, Result>[] {
+  return cacheItems
+    .filter(cacheItem => keysAreEqual(cacheItem.key, key))
+    .sort(ordering)
+}
